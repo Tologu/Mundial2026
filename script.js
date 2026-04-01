@@ -200,9 +200,10 @@ async function guardarPronosticosAsync(docId, pronosticos) {
 async function borrarPronosticosAsync(docId) {
     if (firebaseDisponible) {
         await firebaseBorrarPronosticos(docId);
-        return;
     }
-    localStorage.removeItem(storageKey);
+    // Limpiar también localStorage (cache local) para cualquier docId
+    const key = obtenerStorageKeyParaDocId(docId);
+    localStorage.removeItem(key);
 }
 
 async function cargarPronosticosPorDocId(docId) {
