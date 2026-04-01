@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pronósticos de Tomás</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="admin-panel-flotante">
+        <button id="btn-reiniciar-app" title="Herramienta de Administración (Requiere Contraseña)">
+            ⚙️
+        </button>
+    </div>
+    <header>
+        <h1><img src="world-cup.png" alt="Copa" class="copa-giratoria"> Mundial 2026 <img src="world-cup.png" alt="Copa" class="copa-giratoria"></h1>
+        <nav class="menu">
+            <a href="partidos.html">📅 Partidos</a>
+            <a href="index.html">📊 Clasificación</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="menu perfiles-menu">
+            <a href="perfil-tomas.html">Tomás</a>
+            <a href="perfil-miguel.html">Miguel</a>
+            <a href="perfil-sofia.html">Sofía</a>
+            <a href="perfil-inma.html">Inma</a>
+            <a href="perfil-manolo.html">Manolo</a>
+            <a href="perfil-martina.html">Martina</a>
+            <a href="perfil-adri.html">Adri</a>
+            <a href="perfil-fuen.html">Fuen</a>
+            <a href="perfil-isa.html">Isa</a>
+            <a href="perfil-jose.html">Jose</a>
+            <a href="perfil-maria.html">María</a>
+            <a href="perfil-moi.html">Moi</a>
+            <a href="perfil-alba.html">Alba</a>
+            <a href="perfil-enrique.html">Enrique</a>
+        </div>
+
+        <h2>Pronósticos de Tomás</h2>
+
+        <div class="group-tabs" id="group-tabs">
+        </div>
+
+        <div id="contenedor-grupos">
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script> 
+</body>
+</html>

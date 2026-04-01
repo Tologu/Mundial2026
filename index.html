@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🏆 Clasificación Mundial 2026</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="admin-panel-flotante">
+        <button id="btn-reiniciar-app-total" title="Reiniciar TODO (Requiere Contraseña)">
+            ⚙️
+        </button>
+    </div>
+    <header>
+        <h1><img src="world-cup.png" alt="Copa" class="copa-giratoria"> Mundial 2026 <img src="world-cup.png" alt="Copa" class="copa-giratoria"></h1>
+        <nav>
+            <a href="index.html" class="active">Clasificación</a>
+            <a href="partidos.html">Partidos</a>
+        </nav>
+        <button type="button" class="btn-reglas-header">Reglas</button>
+    </header>
+
+    <main class="clasificacion-page">
+        <h2>Tabla de Posiciones</h2>
+        <table id="tabla-clasificacion">
+            <thead>
+                <tr>
+                    <th>Posición</th>
+                    <th>Participante</th>
+                    <th>Puntos</th>
+                    <th>Aciertos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><a href="perfil-tomas.html">Tomás</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><a href="perfil-miguel.html">Miguel</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-sofia.html">Sofía</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-inma.html">Inma</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-manolo.html">Manolo</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-martina.html">Martina</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-adri.html">Adri</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-fuen.html">Fuen</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-isa.html">Isa</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><a href="perfil-jose.html">Jose</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td><a href="perfil-maria.html">María</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td><a href="perfil-moi.html">Moi</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td><a href="perfil-alba.html">Alba</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td><a href="perfil-enrique.html">Enrique</a></td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <p class="nota">¡Sigue sumando puntos con tus pronósticos!</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mundial 2026</p>
+    </footer>
+
+    <!-- Modal de Reglas -->
+    <div id="modal-reglas" class="modal modal-hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>REGLAS DE PUNTUACIÓN</h2>
+            <div class="reglas-contenido">
+                <h3>FASE DE GRUPOS</h3>
+                <ul>
+                    <li>5 puntos por acertar el resultado exacto de un partido.</li>
+                    <li>2 puntos por acertar simplemente (gana local, gana visitante o empate).</li>
+                </ul>
+                
+                <h3>ELIMINATORIAS (PRESENCIA POR RONDA)</h3>
+                <ul>
+                    <li>Dieciseisavos: 2 puntos por cada equipo que esté en el resultado oficial y también en tu cuadro (cualquier cruce).</li>
+                    <li>Octavos: 3 puntos por equipo.</li>
+                    <li>Cuartos: 4 puntos por equipo.</li>
+                    <li>Semifinales: 5 puntos por equipo.</li>
+                    <li>Final: 6 puntos por cada finalista que coincide.</li>
+                    <li>El partido por el tercer y cuarto puesto no puntúa.</li>
+                </ul>
+                
+                
+                <ul>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

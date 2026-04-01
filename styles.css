@@ -1,0 +1,1119 @@
+/* ESTILOS GENERALES Y RESET */
+:root {
+    --color-principal: #143e68;
+    --color-secundario: #fdb927;
+    --color-fondo: #f4f7f6;
+    --color-texto: #333;
+    --color-blanco: #ffffff;
+    --color-oro: #FFD700;
+    --color-gris-claro: #f3f3f3;
+    --color-overlay: rgba(20, 62, 104, 0.85);
+    --sombra-leve: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --sombra-media: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius-pequeno: 5px;
+    --border-radius-grande: 20px;
+    --transicion-rapida: 0.15s ease;
+    --transicion-normal: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.6;
+}
+
+/* HEADER Y NAVEGACIÓN */
+header {
+    background-color: var(--color-principal);
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: var(--sombra-media);
+    position: relative;
+    /* Imágenes de fondo solo en pantallas grandes */
+}
+
+@media (min-width: 768px) {
+    header {
+        background-image: 
+            url('us.png'),
+            url('ca.png'),
+            url('mexico.png');
+        background-position: 
+            25% 0%,
+            50% 0%,
+            75% 0%;
+        background-repeat: no-repeat;
+        background-size: 
+            20% 100%,
+            20% 100%,
+            20% 100%;
+    }
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-overlay);
+    z-index: 0;
+}
+
+header h1 {
+    margin-bottom: 10px;
+    font-size: 3em;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--color-oro);
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.5),
+        0 0 40px rgba(255, 255, 255, 0.3),
+        3px 3px 0px rgba(0, 0, 0, 0.3),
+        6px 6px 0px rgba(0, 0, 0, 0.2),
+        9px 9px 0px rgba(0, 0, 0, 0.1);
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes resplandor {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+        text-shadow: 
+            0 0 20px rgba(255, 255, 255, 0.8),
+            0 0 40px rgba(255, 255, 255, 0.6),
+            0 0 60px var(--color-gris-claro),
+            3px 3px 0px rgba(0, 0, 0, 0.3),
+            6px 6px 0px rgba(0, 0, 0, 0.2),
+            9px 9px 0px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(171, 148, 16, 0.9));
+        text-shadow: 
+            0 0 30px rgba(255, 215, 0, 1),
+            0 0 50px rgba(255, 215, 0, 0.8),
+            0 0 70px rgba(255, 215, 0, 0.6),
+            3px 3px 0px rgba(0, 0, 0, 0.3),
+            6px 6px 0px rgba(0, 0, 0, 0.2),
+            9px 9px 0px rgba(0, 0, 0, 0.1);
+    }
+}
+
+header h1 .copa-giratoria {
+    display: inline-block;
+    animation: girar 5s linear infinite;
+    margin: 0 15px;
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+}
+
+@keyframes girar {
+    0% {
+        transform: rotateY(0deg) rotateX(0deg);
+    }
+    100% {
+        transform: rotateY(360deg) rotateX(5deg);
+    }
+}
+
+nav {
+    position: relative;
+    z-index: 1;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+nav a.active {
+    background-color: var(--color-secundario);
+    color: var(--color-principal);
+    font-weight: bold;
+}
+
+.btn-reglas-header {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: #ffffff;
+    color: var(--color-principal);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9em;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    z-index: 10;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-reglas-header:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Navegación adaptable en móvil */
+/* CONTENIDO PRINCIPAL */
+main {
+    padding: 30px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.perfiles-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    margin: 0 0 18px 0;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(6px);
+}
+
+.perfiles-menu a {
+    text-decoration: none;
+    color: var(--color-principal);
+    font-weight: 700;
+    font-size: 0.95em;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff, #f3f6fb);
+    border: 1px solid rgba(26, 77, 149, 0.18);
+    box-shadow: 0 2px 8px rgba(26, 77, 149, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.perfiles-menu a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(26, 77, 149, 0.16);
+}
+
+.perfiles-menu a:active {
+    transform: translateY(0px);
+}
+
+h2 {
+    color: var(--color-principal);
+    border-bottom: 2px solid var(--color-secundario);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+/* CLASIFICACIÓN (index.html) */
+#tabla-clasificacion {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 15px rgba(20, 62, 104, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#tabla-clasificacion th, #tabla-clasificacion td {
+    padding: 18px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#tabla-clasificacion thead {
+    background: linear-gradient(135deg, var(--color-principal) 0%, #1a5a96 100%);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9em;
+}
+
+#tabla-clasificacion tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#tabla-clasificacion tbody tr:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#tabla-clasificacion tbody a {
+    color: var(--color-principal);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+#tabla-clasificacion tbody a:hover {
+    color: var(--color-secundario);
+    background-color: rgba(253, 185, 39, 0.1);
+}
+
+#tabla-clasificacion tbody tr:first-child {
+    font-weight: bold;
+    color: black;
+    background: linear-gradient(90deg, #ffe082, #fdb927, #ffe082);
+    background-size: 200% 200%;
+    animation: brillo 3s linear infinite, pulso 2s ease-in-out infinite;
+    box-shadow: 4px 2px 20px 3px rgba(253, 185, 39, 0.7);
+}
+@keyframes pulso {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+@keyframes brillo {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+.giro {
+  display: inline-block; /* necesario para aplicar transformaciones */
+  animation: rotar 4s linear infinite;
+}
+
+@keyframes rotar {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+/* Último puesto en la clasificación */
+#tabla-clasificacion tbody tr:last-child {
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg, #f39b9b, #e53935, #b71c1c);
+    background-size: 200% 200%;
+    animation: alerta 3s linear infinite, vibrar 2s ease-in-out infinite;
+}
+
+/* Animación de brillo en rojo */
+@keyframes alerta {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Animación de vibración ligera */
+@keyframes vibrar {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+@keyframes desvanecer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+#tabla-clasificacion tbody tr:last-child {
+  animation: alerta 3s linear infinite, vibrar 2s ease-in-out infinite, desvanecer 4s ease-in-out infinite;
+}
+#tabla-clasificacion tbody tr:hover {
+  background-color: rgba(255, 255, 0, 0.2);
+  cursor: pointer;
+}
+
+/* PARTIDOS (partidos.html) */
+.partido-card {
+    background-color: white;
+    border-left: 5px solid var(--color-principal);
+    padding: 18px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: auto 1.3fr auto;
+    gap: 8px 12px;
+    align-items: center;
+    position: relative;
+}
+
+.info-partido {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+    color: #666;
+    margin-right: 16px;
+}
+
+.info-partido .fecha {
+    font-weight: bold;
+    color: var(--color-principal);
+    margin-bottom: 5px;
+}
+
+.equipos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  font-weight: bold;
+  justify-content: center;
+}
+
+.equipo-local,
+.equipo-visitante {
+  min-width: 120px;
+  text-align: center;
+}
+
+.equipos .marcador {
+    width: 50px;
+    text-align: center;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-confirmar,
+.btn-cambiar,
+.btn-acertantes-exactos {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    font-size: 0.9em;
+}
+
+.btn-confirmar {
+    background: linear-gradient(90deg, #43a047, #66bb6a);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(67, 160, 71, 0.35);
+}
+
+.btn-confirmar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(67, 160, 71, 0.45);
+}
+
+.btn-cambiar {
+    background: linear-gradient(90deg, #ef5350, #e53935);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(229, 57, 53, 0.35);
+}
+
+.btn-cambiar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(229, 57, 53, 0.45);
+}
+
+.btn-acertantes-exactos {
+    background: linear-gradient(90deg, #2196f3, #42a5f5);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.35);
+}
+
+.btn-acertantes-exactos:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(33, 150, 243, 0.45);
+}
+
+.btn-confirmar:disabled,
+.btn-cambiar:disabled,
+.btn-acertantes-exactos:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.confirmado-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    border-radius: 50%;
+    border: 1px solid #2e7d32;
+    background: #e6ffe6;
+    color: #2e7d32;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 1;
+    visibility: hidden;
+}
+
+.confirmado-check.visible {
+    visibility: visible;
+}
+
+.vs {
+    margin: 0 6px;
+    color: var(--color-secundario);
+    font-size: 0.9em;
+    font-weight: bold;
+    min-width: 25px;
+    text-align: center;
+}
+
+.badge-puntos {
+    position: absolute;
+    left: -20px;
+    top: 10px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.85em;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.badge-exacto {
+    background: linear-gradient(90deg, #ffe082, #ffe082);
+    color: #754b00;
+    border: 1px solid #fdb927;
+}
+
+.badge-signo {
+    background: #8bc34a;
+    border: 1px solid #6fa834;
+    left: -20px;
+}
+
+.perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pronostico-tab {
+  background-color: var(--color-principal);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+
+.pronostico-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-pronostico {
+    background-color: var(--color-secundario);
+    color: var(--color-principal);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-pronostico:hover {
+    background-color: #ffc84a;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 30px;
+    border-top: 1px solid #ddd;
+    color: #777;
+    font-size: 0.9em;
+}
+.grupo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.grupo-selector {
+    padding: 5px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.clasificacion-page {
+  overflow-x: auto;
+}
+
+#tabla-clasificacion {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em; /* más compacto en móvil */
+}
+.group-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+    gap: 2px; /* Espacio mínimo entre botones */
+}
+
+.tab-button {
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: #eee;
+    border: none;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: bold;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    font-size: 0.9em;
+}
+
+.tab-button:hover {
+    background-color: #e0e0e0;
+}
+
+.tab-button.active {
+    background-color: white;
+    color: var(--color-principal);
+    border-bottom: 2px solid var(--color-secundario);
+    margin-bottom: -2px; /* Superpone el borde inferior */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* Sombra sutil arriba */
+}
+
+/* Reglas para mostrar/ocultar el contenido de los grupos */
+#contenedor-grupos .grupo {
+    display: none; /* Oculta todos los grupos por defecto */
+    padding-top: 10px;
+}
+
+#contenedor-grupos .grupo.active {
+    display: block; /* Muestra el grupo activo */
+}
+/* --- ESTILOS DE TABLA DE CLASIFICACIÓN DENTRO DE GRUPOS --- */
+
+.tabla-clasificacion-grupo {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+.tabla-clasificacion-grupo thead {
+    background-color: var(--color-principal);
+    color: white;
+}
+
+.tabla-clasificacion-grupo th, .tabla-clasificacion-grupo td {
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.tabla-clasificacion-grupo tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Colores de Posición */
+/* --- ESTILOS DE TABLA DE CLASIFICACIÓN DENTRO DE GRUPOS --- */
+
+.tabla-clasificacion-grupo {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+.tabla-clasificacion-grupo thead {
+    background-color: var(--color-principal); /* O el color que uses para tu encabezado */
+    color: white;
+}
+
+.tabla-clasificacion-grupo th, .tabla-clasificacion-grupo td {
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+/* IMPORTANTE: Colores de Posición */
+
+/* 1º y 2º puesto: Pasan a dieciseisavos (Fondo verde) */
+.tabla-clasificacion-grupo .pasa-directo { 
+    background-color: #e6ffe6 !important; /* Verde suave. Usamos !important para anular estilos de fondo de tr:nth-child(even) */
+    font-weight: bold;
+}
+
+/* 3º puesto: Candidato a mejor tercero (Fondo amarillo claro) */
+.tabla-clasificacion-grupo .candidato-tercero {
+    background-color: #fffacd !important; /* Amarillo claro */
+}
+
+/* 4º puesto: Eliminado (Fondo rojo suave) */
+.tabla-clasificacion-grupo .eliminado {
+    background-color: #ffe6e6 !important; /* Rojo suave */
+}
+
+.tabla-clasificacion-grupo td.equipo-nombre {
+    font-weight: bold;
+}
+
+.mejores-terceros-wrapper {
+    margin-top: 12px;
+}
+
+.btn-mejores-terceros {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-mejores-terceros:hover {
+    background: #f6f6f6;
+}
+
+.mejores-terceros-panel {
+    margin-top: 10px;
+}
+
+.mejores-terceros-panel h4 {
+    margin: 0 0 10px 0;
+    color: var(--color-principal);
+}
+
+/* --- ESTILOS PARA EL BRACKET DE DIECISEISAVOS --- */
+
+#bracket-dieciseisavos {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: space-around;
+}
+
+.partido-bracket {
+    width: calc(50% - 15px); /* Dos columnas */
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f7f7f7;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.partido-bracket .llave {
+    display: block;
+    font-weight: bold;
+    color: var(--color-principal);
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 3px;
+}
+
+.enfrentamiento {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+}
+
+.equipo-bracket {
+    font-weight: 500;
+    flex-basis: 40%;
+    text-align: center;
+}
+
+.vs-bracket {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* En móviles, una sola columna */
+/* ==================================================================== */
+/* ESTILOS ESPECÍFICOS DE LAS RONDAS ELIMINATORIAS (R32, R16, R8, R4, FINAL) */
+/* ==================================================================== */
+
+.ronda-eliminatoria {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre cada partido de la ronda */
+    padding: 20px 0;
+}
+
+.partido-bracket {
+    background-color: #f8f9fa; /* Fondo claro para la tarjeta del partido */
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Estado de Enfrentamiento (Hover) */
+.partido-bracket:not(.deshabilitado):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicador de Llave (M73, M104, etc.) */
+.llave {
+    font-size: 0.8em;
+    color: #6c757d; /* Gris tenue */
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* Contenedor principal de los botones VS */
+.enfrentamiento-clic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.vs-eliminatoria {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #495057; /* Gris oscuro */
+    margin: 0 10px;
+}
+
+/* ---------------------------------------------------- */
+/* ESTILOS DE LOS BOTONES DE EQUIPO (PRONÓSTICO) */
+/* ---------------------------------------------------- */
+
+.btn-equipo-ganador {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 2px solid #ced4da; /* Borde predeterminado */
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #343a40;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    white-space: nowrap; /* Evita que los nombres largos se rompan */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 120px;
+}
+
+.btn-equipo-ganador:hover:not(:disabled) {
+    background-color: #e9ecef; /* Resaltar al pasar el ratón */
+    border-color: #adb5bd;
+}
+
+.btn-equipo-ganador:active:not(:disabled) {
+    background-color: #dee2e6;
+}
+
+/* ---------------------------------------------------- */
+/* ESTADO DEL GANADOR ELEGIDO (CLAVE PARA DESTACAR) */
+/* ---------------------------------------------------- */
+
+.btn-equipo-ganador.elegido {
+    background-color: #007bff; /* Azul primario fuerte */
+    color: #d4d709; /* Texto blanco para alto contraste */
+    border-color: #0056b3;
+    font-weight: bold;
+    /* Efecto visual de "ganador" */
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    transform: scale(1.02);
+}
+
+.partido-bracket.deshabilitado .btn-equipo-ganador.elegido {
+    /* El ganador sigue destacado pero desactiva el hover/cursor */
+    cursor: default;
+    opacity: 1; /* Asegurar que no se atenúa */
+}
+
+/* ---------------------------------------------------- */
+/* ESTADOS ESPECIALES */
+/* ---------------------------------------------------- */
+
+/* Partidos Completados (Deshabilitados) */
+.partido-bracket.deshabilitado {
+    border-left: 5px solid #007bff; /* Borde lateral para indicar "completo" */
+    opacity: 0.9;
+}
+
+/* Botones deshabilitados (TBD o ya elegido) */
+.btn-equipo-ganador:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #f1f3f5;
+    border-color: #e9ecef;
+}
+
+/* Enfrentamiento con TBD (Falta definir la llave anterior) */
+.partido-bracket.tbd-enfrentamiento {
+    background-color: #fff3cd; /* Fondo amarillo claro de advertencia */
+    border: 1px dashed #ffc107; /* Borde discontinuo */
+}
+
+.partido-bracket.tbd-enfrentamiento .btn-equipo-ganador:disabled {
+    color: #856404; /* Color de texto más oscuro de advertencia */
+    font-style: italic;
+}
+
+
+/* ---------------------------------------------------- */
+/* BOTÓN DE CAMBIAR GANADOR (PARA PARTIDOS YA RESUELTOS) */
+/* ---------------------------------------------------- */
+
+.acciones-elim {
+    margin-top: 10px;
+}
+
+.btn-cambiar-elim-clic {
+    background-color: #dc3545; /* Rojo para la acción de "deshacer" */
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.btn-cambiar-elim-clic:hover {
+    background-color: #c82333;
+}
+
+.puntos-ronda {
+    margin-top: 6px;
+    align-self: flex-end;
+    font-weight: bold;
+    color: #000;
+    font-size: 0.9em;
+}
+/* ==================================================================== */
+/* ESTILOS PARA EL BOTÓN DE ADMINISTRACIÓN (REINICIO) */
+/* ==================================================================== */
+
+#admin-panel-flotante {
+    position: fixed; /* Fija el botón en la ventana del navegador */
+    top: 10px;      /* Distancia desde la parte superior */
+    left: 10px;     /* Distancia desde la izquierda */
+    z-index: 1000;  /* Asegura que esté por encima de otros elementos */
+}
+
+#btn-reiniciar-app {
+    /* Estilo para que parezca un icono o un botón secundario */
+    background-color: #f1f1f1;
+    color: #495057; 
+    border: 1px solid #ccc;
+    border-radius: 50%; /* Lo hacemos redondo */
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    font-size: 1.1em;
+    cursor: pointer;
+    opacity: 0.5; /* Lo hacemos semitransparente para que no destaque */
+    transition: opacity 0.3s, background-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#btn-reiniciar-app:hover {
+    opacity: 1; /* Al pasar el ratón, se revela completamente */
+    background-color: #e9ecef;
+    color: #000;
+}
+
+/* ==================================================================== */
+/* MARCADO DE ACIERTOS EN PERFILES */
+/* ==================================================================== */
+.partido-card.acierto-exacto {
+    border-left-color: #ffc815;
+    background: linear-gradient(90deg, #ffe082, #fdb927, #ffe082);
+    background-size: 200% 200%;
+    animation: brillo 7s linear infinite, pulso 6s ease-in-out infinite;
+    box-shadow: 4px 2px 20px 3px rgba(253, 185, 39, 0.7);
+}
+
+.partido-card.acierto-signo {
+    border-left-color: #8bc34a;
+    background: #d4ffa3;
+    box-shadow: 0 0 6px rgba(139, 195, 74, 0.35);
+}
+
+/* ==================================================================== */
+/* DESACTIVAR RESPONSIVE EN PERFILES (perfil-*.html) */
+/* ==================================================================== */
+body.perfil-page {
+    min-width: 1024px;
+    overflow-x: auto;
+}
+
+body.perfil-page main {
+    min-width: 1000px;
+}
+
+body.perfil-page .partido-card {
+    grid-template-columns: auto 1.5fr auto !important;
+}
+
+body.perfil-page .equipos {
+    flex-wrap: nowrap !important;
+}
+
+body.perfil-page .group-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+body.perfil-page .tab-button {
+    min-width: max-content;
+    white-space: nowrap;
+}
+
+/* ESTILOS PARA EL MODAL DE REGLAS */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease-in;
+    display: block;
+}
+
+.modal.modal-hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 85%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: var(--color-principal);
+}
+
+.modal h2 {
+    color: var(--color-principal);
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--color-secundario);
+    padding-bottom: 10px;
+}
+
+.reglas-contenido h3 {
+    color: var(--color-principal);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.reglas-contenido h3:first-of-type {
+    margin-top: 0;
+}
+
+.reglas-contenido ul {
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.reglas-contenido li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
