@@ -642,6 +642,14 @@ function generarEstructuraPartidos() {
     const contenedorGrupos = document.getElementById("contenedor-grupos");
     const contenedorTabs = document.getElementById("group-tabs");
 
+    // Sub-contenedores para grupos y eliminatorias
+    const tabsGruposDiv = document.createElement('div');
+    tabsGruposDiv.className = 'tabs-grupos';
+    const tabsElimDiv = document.createElement('div');
+    tabsElimDiv.className = 'tabs-eliminatorias';
+    contenedorTabs.appendChild(tabsGruposDiv);
+    contenedorTabs.appendChild(tabsElimDiv);
+
     // 1. GENERAR PESTAÑAS Y CONTENIDO DE GRUPOS
     gruposData.forEach((grupo, index) => {
         const idGrupo = `grupo-${grupo.nombre.toLowerCase()}`;
@@ -696,7 +704,7 @@ function generarEstructuraPartidos() {
 
         section.innerHTML = htmlContent;
         
-        contenedorTabs.appendChild(button);
+        tabsGruposDiv.appendChild(button);
         contenedorGrupos.appendChild(section);
 
         // Activar el primer grupo (Grupo A) por defecto al cargar
@@ -720,7 +728,7 @@ function generarEstructuraPartidos() {
         buttonRonda.className = 'tab-button';
         buttonRonda.textContent = rondaData.nombre;
         buttonRonda.dataset.target = rondaData.id;
-        contenedorTabs.appendChild(buttonRonda);
+        tabsElimDiv.appendChild(buttonRonda);
 
         const sectionRonda = document.createElement('section');
         sectionRonda.className = 'grupo';
