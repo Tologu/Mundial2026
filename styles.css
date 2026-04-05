@@ -596,11 +596,22 @@ footer {
   font-size: 0.9em; /* más compacto en móvil */
 }
 .group-tabs {
+    margin-bottom: 20px;
+}
+
+.tabs-grupos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tabs-eliminatorias {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    gap: 2px;
+    margin-top: 12px;
     border-bottom: 2px solid #ddd;
-    gap: 2px; /* Espacio mínimo entre botones */
 }
 
 .tab-button {
@@ -1029,7 +1040,13 @@ body.perfil-page .equipos {
     flex-wrap: nowrap !important;
 }
 
-body.perfil-page .group-tabs {
+body.perfil-page .tabs-grupos {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+body.perfil-page .tabs-eliminatorias {
     flex-wrap: nowrap;
     overflow-x: auto;
 }
