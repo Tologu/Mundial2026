@@ -2,16 +2,6 @@
 // 0. GESTIÓN DE LOCAL STORAGE (PERSISTENCIA DE DATOS MULTI-USUARIO)
 // ====================================================================
 
-// --- REFERENCIA DE CONTRASEÑAS (solo para el desarrollador) ---
-// Mundial2026  ->  78d84535
-// Tomas2026    ->  bd9de6e7    Miguel2026   ->  851091c
-// Sofia2026    ->  136ce531    Inma2026     ->  fcb3a3e8
-// Manolo2026   ->  54fa0acd    Martina2026  ->  50897f8f
-// Adri2026     ->  9add415d    Fuen2026     ->  ddd34d1b
-// Isa2026      ->  a2b56118    Jose2026     ->  1e4188d0
-// Maria2026    ->  7aa6775     Moi2026      ->  40c70d88
-// Alba2026     ->  dcdce14d    Enrique2026  ->  48c76af2
-// OvejaBandolera -> 29dae08e
 
 /** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
 function ph(str) {
