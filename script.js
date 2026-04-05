@@ -2,11 +2,32 @@
 // 0. GESTIÓN DE LOCAL STORAGE (PERSISTENCIA DE DATOS MULTI-USUARIO)
 // ====================================================================
 
+// --- REFERENCIA DE CONTRASEÑAS (solo para el desarrollador) ---
+// Mundial2026  ->  78d84535
+// Tomas2026    ->  bd9de6e7    Miguel2026   ->  851091c
+// Sofia2026    ->  136ce531    Inma2026     ->  fcb3a3e8
+// Manolo2026   ->  54fa0acd    Martina2026  ->  50897f8f
+// Adri2026     ->  9add415d    Fuen2026     ->  ddd34d1b
+// Isa2026      ->  a2b56118    Jose2026     ->  1e4188d0
+// Maria2026    ->  7aa6775     Moi2026      ->  40c70d88
+// Alba2026     ->  dcdce14d    Enrique2026  ->  48c76af2
+// OvejaBandolera -> 29dae08e
+
+/** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
+function ph(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) + h) ^ str.charCodeAt(i);
+        h = h >>> 0;
+    }
+    return h.toString(16);
+}
+
 // --- Detección de Perfil y Configuración ---
 let storageKey;
 let passwordReiniciar;
 const esPaginaPartidos = window.location.pathname.includes('partidos.html');
-const CONTRASENA_CAMBIO_PERFIL = "OvejaBandolera";
+const CONTRASENA_CAMBIO_PERFIL = "29dae08e";
 const REGEX_PERFIL = /perfil-(\w+)\.html/; // Compilar regex una sola vez
 
 // Obtener la parte del nombre del archivo de la URL (ej: 'perfil-tomas')
@@ -68,23 +89,23 @@ const perfilNombre = perfilMatch ? perfilMatch[1] : null;
 // Mapa de configuración para todos los perfiles
 const perfilesConfig = {
     // Tu perfil (partidos.html)
-    partidos: { key: 'pronosticosMundial', password: 'Mundial2026'  },
+    partidos: { key: 'pronosticosMundial', password: '78d84535'  },
     
     // Perfiles de Jugadores
-    tomas: { key: 'pronosticosMundial_Tomas', password: 'Tomas2026' },
-    miguel: { key: 'pronosticosMundial_Miguel', password: 'Miguel2026' },
-    sofia: { key: 'pronosticosMundial_Sofia', password: 'Sofia2026' },
-    inma: { key: 'pronosticosMundial_Inma', password: 'Inma2026' },
-    manolo: { key: 'pronosticosMundial_Manolo', password: 'Manolo2026' },
-    martina: { key: 'pronosticosMundial_Martina', password: 'Martina2026' },
-    adri: { key: 'pronosticosMundial_Adri', password: 'Adri2026' },
-    fuen: { key: 'pronosticosMundial_Fuen', password: 'Fuen2026' },
-    isa: { key: 'pronosticosMundial_Isa', password: 'Isa2026' },
-    jose: { key: 'pronosticosMundial_Jose', password: 'Jose2026' },
-    maria: { key: 'pronosticosMundial_Maria', password: 'Maria2026' },
-    moi: { key: 'pronosticosMundial_Moi', password: 'Moi2026' },
-    alba: { key: 'pronosticosMundial_Alba', password: 'Alba2026' },
-    enrique: { key: 'pronosticosMundial_Enrique', password: 'Enrique2026' },
+    tomas: { key: 'pronosticosMundial_Tomas', password: 'bd9de6e7' },
+    miguel: { key: 'pronosticosMundial_Miguel', password: '851091c' },
+    sofia: { key: 'pronosticosMundial_Sofia', password: '136ce531' },
+    inma: { key: 'pronosticosMundial_Inma', password: 'fcb3a3e8' },
+    manolo: { key: 'pronosticosMundial_Manolo', password: '54fa0acd' },
+    martina: { key: 'pronosticosMundial_Martina', password: '50897f8f' },
+    adri: { key: 'pronosticosMundial_Adri', password: '9add415d' },
+    fuen: { key: 'pronosticosMundial_Fuen', password: 'ddd34d1b' },
+    isa: { key: 'pronosticosMundial_Isa', password: 'a2b56118' },
+    jose: { key: 'pronosticosMundial_Jose', password: '1e4188d0' },
+    maria: { key: 'pronosticosMundial_Maria', password: '7aa6775' },
+    moi: { key: 'pronosticosMundial_Moi', password: '40c70d88' },
+    alba: { key: 'pronosticosMundial_Alba', password: 'dcdce14d' },
+    enrique: { key: 'pronosticosMundial_Enrique', password: '48c76af2' },
     // Añade más perfiles aquí si es necesario
 };
 
@@ -161,7 +182,7 @@ if (perfilNombre) {
 } else {
     // Fallback por defecto (ej. si estamos en index.html, aunque no debería interactuar)
     storageKey = 'pronosticosMundial';
-    passwordReiniciar = 'Mundial2026';
+    passwordReiniciar = '78d84535';
 }
 
 /**
@@ -1078,7 +1099,7 @@ function manejarPronostico(event) {
         guardarPronosticos();
     } else if (boton.classList.contains('btn-cambiar')) {
         const pass = prompt('Introduce la contraseña para modificar este pronóstico:');
-        if (pass !== passwordReiniciar) {
+        if (ph(pass) !== passwordReiniciar) {
             if (pass !== null) {
                 alert('Contraseña incorrecta. No se ha modificado el pronóstico.');
             }
@@ -1472,7 +1493,7 @@ function manejarPronosticoEliminatoria(event) {
         
     } else if (esCambiar) {
         const pass = prompt("Introduce la contraseña para cambiar el ganador:");
-        if (pass !== passwordReiniciar) {
+        if (ph(pass) !== passwordReiniciar) {
             if (pass !== null) {
                 alert("Contraseña incorrecta. No se ha modificado el ganador.");
             }
@@ -1632,7 +1653,7 @@ function reiniciarPronosticos() {
     // Usamos la variable global 'passwordReiniciar'
     const password = prompt(`Introduce la contraseña para reiniciar los resultados de ${storageKey.replace('pronosticosMundial_', '').replace('pronosticosMundial', 'este perfil')}:`);
     
-    if (password === passwordReiniciar) {
+    if (ph(password) === passwordReiniciar) {
         borrarPronosticosAsync(docIdActual || DOC_ID_OFICIALES)
             .then(() => {
                 alert(`¡Todos los pronósticos de este perfil han sido reiniciados! La página se recargará ahora.`);
@@ -1655,9 +1676,9 @@ async function reiniciarTodo() {
     
     if (!password) return; // Cancelado por el usuario
     
-    const passwordMaestra = 'OvejaBandolera'; // Contraseña maestra
+    const passwordMaestra = '29dae08e'; // Contraseña maestra (hash)
     
-    if (password !== passwordMaestra) {
+    if (ph(password) !== passwordMaestra) {
         alert("Contraseña incorrecta. El reinicio ha sido cancelado.");
         return;
     }
