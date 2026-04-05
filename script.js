@@ -649,7 +649,7 @@ function generarEstructuraPartidos() {
         // Crear botón de pestaña (Tab)
         const button = document.createElement('button');
         button.className = 'tab-button';
-        button.textContent = `Grupo ${grupo.nombre}`;
+        button.innerHTML = `Grupo ${grupo.nombre}<span class="tab-equipos">${grupo.equipos.join(' · ')}</span>`;
         button.dataset.target = idGrupo;
         
         // Crear contenido del grupo (Section)
