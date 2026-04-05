@@ -1,6 +1,4 @@
-﻿// ====================================================================
-// 0. GESTIÓN DE LOCAL STORAGE (PERSISTENCIA DE DATOS MULTI-USUARIO)
-// ====================================================================
+﻿
 
 
 /** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
