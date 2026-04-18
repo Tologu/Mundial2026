@@ -1628,7 +1628,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? obtenerAcertantesExactosAsync(nombrePartido)
                     : Promise.resolve(obtenerAcertantesExactos(nombrePartido)));
                 if (lista && lista.length) {
-                    backContent.innerHTML = `<strong>(${lista.length})</strong><br>${lista.join(', ')}`;
+                    const listaOrdenada = [...lista].sort((a, b) => a.localeCompare(b, 'es', {sensitivity: 'base'}));
+                    backContent.innerHTML = `<strong>(${listaOrdenada.length})</strong><br>${listaOrdenada.join(', ')}`;
                 } else {
                     backContent.innerHTML = 'Nadie aún';
                 }
