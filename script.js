@@ -400,12 +400,22 @@ async function actualizarClasificacionIndex(useAsync = false) {
     clasificacion.forEach((item, index) => {
         const posicion = index + 1;
         const fila = document.createElement('tr');
-        fila.innerHTML = `
-            <td>${posicion}</td>
-            <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
-            <td>${item.puntos}</td>
-            <td>${item.aciertos}</td>
-        `;
+        // Último puesto
+        if (index === clasificacion.length - 1) {
+            fila.innerHTML = `
+                <td>${posicion} <span class=\"emoji-clown\">🤡</span></td>
+                <td><a href=\"perfil-${item.slug}.html\" class=\"ultimo-puesto\">${item.nombreVisible}</a></td>
+                <td>${item.puntos} <span class=\"emoji-poop\">💩</span></td>
+                <td>${item.aciertos}</td>
+            `;
+        } else {
+            fila.innerHTML = `
+                <td>${posicion}</td>
+                <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
+                <td>${item.puntos}</td>
+                <td>${item.aciertos}</td>
+            `;
+        }
         tbody.appendChild(fila);
     });
 }
