@@ -418,8 +418,7 @@ h2 {
 }
 
 .btn-confirmar,
-.btn-cambiar,
-.btn-acertantes-exactos {
+.btn-cambiar {
     border: none;
     padding: 8px 12px;
     border-radius: 6px;
@@ -451,24 +450,80 @@ h2 {
     box-shadow: 0 3px 8px rgba(229, 57, 53, 0.45);
 }
 
-.btn-acertantes-exactos {
-    background: linear-gradient(90deg, #2196f3, #42a5f5);
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.35);
-}
-
-.btn-acertantes-exactos:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(33, 150, 243, 0.45);
-}
-
 .btn-confirmar:disabled,
-.btn-cambiar:disabled,
-.btn-acertantes-exactos:disabled {
+.btn-cambiar:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+/* FLIP CARD - Acertantes Exactos */
+.flip-acertantes {
+    perspective: 800px;
+    display: inline-block;
+    height: 36px;
+    min-width: 160px;
+    position: relative;
+    vertical-align: middle;
+}
+
+.flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-acertantes.flipped .flip-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-front,
+.flip-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.flip-front {
+    background: linear-gradient(90deg, #2196f3, #42a5f5);
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.9em;
+    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.35);
+    transition: box-shadow 0.15s ease;
+    border: none;
+    padding: 8px 12px;
+}
+
+.flip-front:hover {
+    box-shadow: 0 3px 8px rgba(33, 150, 243, 0.45);
+}
+
+.flip-back {
+    background: #e3f2fd;
+    color: #143e68;
+    border: 2px solid #2196f3;
+    transform: rotateY(180deg);
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 6px 10px;
+    line-height: 1.3;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .confirmado-check {

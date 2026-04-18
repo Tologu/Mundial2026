@@ -705,7 +705,7 @@ function generarEstructuraPartidos() {
               <div class="acciones">
                 ${checkConfirmadoHtml}<button class="btn-confirmar" ${btnConfirmarDisabled}>Confirmar</button>
                 <button class="btn-cambiar" ${btnCambiarDisabled}>Cambiar</button>
-                ${esPaginaPartidos ? `<button class="btn-acertantes-exactos" data-partido="${nombrePartido}">Acertantes Exactos</button>` : ''}
+                ${esPaginaPartidos ? `<div class="flip-acertantes" data-partido="${nombrePartido}"><div class="flip-inner"><div class="flip-front">Acertantes Exactos</div><div class="flip-back"><div class="flip-back-content">Cargando...</div></div></div></div>` : ''}
               </div>
             </div>
           `;
@@ -1010,22 +1010,6 @@ function renderizarClasificacion(grupoData, clasificacion) {
 
 function manejarPronostico(event) {
     const boton = event.target;
-    if (boton.classList.contains('btn-acertantes-exactos')) {
-        const nombrePartido = boton.dataset.partido;
-        (firebaseDisponible ? obtenerAcertantesExactosAsync(nombrePartido) : Promise.resolve(obtenerAcertantesExactos(nombrePartido)))
-            .then(lista => {
-                const mensaje = lista.length
-                    ? `Acertantes exactos (${lista.length}):\n- ${lista.join('\n- ')}`
-                    : 'Nadie ha acertado este resultado exacto todavía.';
-                alert(mensaje);
-            })
-            .catch(e => {
-                console.error(e);
-                alert('No se pudieron calcular los acertantes exactos.');
-            });
-        return;
-    }
-
     if (!boton.classList.contains('btn-confirmar') && !boton.classList.contains('btn-cambiar')) return;
 
     const partidoCard = boton.closest('.partido-card');
@@ -1620,58 +1604,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Escuchar eventos en el contenedor principal (para Confirmar/Cambiar de GRUPOS)
     contenedorGrupos.addEventListener('click', manejarPronostico);
 
-    // Mostrar acertantes exactos al pasar el ratón (hover)
-    contenedorGrupos.addEventListener('mouseover', async (event) => {
-        const boton = event.target;
-        if (boton.classList && boton.classList.contains('btn-acertantes-exactos')) {
-            // Evitar mostrar múltiples tooltips
-            if (document.getElementById('tooltip-acertantes-exactos')) return;
-            const nombrePartido = boton.dataset.partido;
-            let lista = [];
-            try {
-                lista = await (firebaseDisponible ? obtenerAcertantesExactosAsync(nombrePartido) : Promise.resolve(obtenerAcertantesExactos(nombrePartido)));
-            } catch (e) {
-                lista = null;
+    // Flip de acertantes exactos al hacer clic
+    contenedorGrupos.addEventListener('click', async (event) => {
+        const front = event.target.closest('.flip-front');
+        const back = event.target.closest('.flip-back');
+
+        if (front) {
+            const card = front.closest('.flip-acertantes');
+            if (!card) return;
+
+            if (card.classList.contains('flipped')) {
+                card.classList.remove('flipped');
+                return;
             }
-            const mensaje = (lista && lista.length)
-                ? `Acertantes exactos (${lista.length}):\n- ${lista.join('\n- ')}`
-                : (lista === null ? 'No se pudieron calcular los acertantes exactos.' : 'Nadie ha acertado este resultado exacto todavía.');
 
-            // Crear tooltip flotante
-            const tooltip = document.createElement('div');
-            tooltip.id = 'tooltip-acertantes-exactos';
-            tooltip.textContent = '';
-            mensaje.split('\n').forEach(linea => {
-                tooltip.appendChild(document.createTextNode(linea));
-                tooltip.appendChild(document.createElement('br'));
-            });
-            tooltip.style.position = 'absolute';
-            tooltip.style.zIndex = 9999;
-            tooltip.style.background = '#fff';
-            tooltip.style.color = '#143e68';
-            tooltip.style.border = '2px solid #2196f3';
-            tooltip.style.borderRadius = '8px';
-            tooltip.style.boxShadow = '0 4px 16px rgba(33,150,243,0.15)';
-            tooltip.style.padding = '10px 16px';
-            tooltip.style.fontSize = '1em';
-            tooltip.style.whiteSpace = 'pre';
-            tooltip.style.pointerEvents = 'none';
+            const nombrePartido = card.dataset.partido;
+            const backContent = card.querySelector('.flip-back-content');
+            backContent.innerHTML = 'Cargando...';
+            card.classList.add('flipped');
 
-            // Posicionar cerca del botón
-            const rect = boton.getBoundingClientRect();
-            tooltip.style.left = `${rect.left + window.scrollX + rect.width/2}px`;
-            tooltip.style.top = `${rect.top + window.scrollY + rect.height + 8}px`;
-
-            document.body.appendChild(tooltip);
+            try {
+                const lista = await (firebaseDisponible
+                    ? obtenerAcertantesExactosAsync(nombrePartido)
+                    : Promise.resolve(obtenerAcertantesExactos(nombrePartido)));
+                if (lista && lista.length) {
+                    backContent.innerHTML = `<strong>(${lista.length})</strong><br>${lista.join(', ')}`;
+                } else {
+                    backContent.innerHTML = 'Nadie aún';
+                }
+            } catch (e) {
+                backContent.innerHTML = 'Error';
+            }
+        } else if (back) {
+            const card = back.closest('.flip-acertantes');
+            if (card) card.classList.remove('flipped');
         }
     });
-    contenedorGrupos.addEventListener('mouseout', (event) => {
-        const boton = event.target;
-        if (boton.classList && boton.classList.contains('btn-acertantes-exactos')) {
-            const tooltip = document.getElementById('tooltip-acertantes-exactos');
-            if (tooltip) tooltip.remove();
-        }
-    });
+
+
     
     // 3. Escuchar eventos en el contenedor principal (para ELIMINATORIAS - CLIC)
     contenedorGrupos.addEventListener('click', manejarPronosticoEliminatoria);
