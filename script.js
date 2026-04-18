@@ -1631,7 +1631,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const listaOrdenada = [...lista].sort((a, b) => a.localeCompare(b, 'es', {sensitivity: 'base'}));
                     backContent.innerHTML = `<strong>(${listaOrdenada.length})</strong><br>${listaOrdenada.join(', ')}`;
                 } else {
-                    backContent.innerHTML = 'Nadie aún';
+                    backContent.innerHTML = 'Ningún acertante exacto';
                 }
             } catch (e) {
                 backContent.innerHTML = 'Error';
