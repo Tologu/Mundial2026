@@ -1,3 +1,23 @@
+/* Último puesto animado */
+.ultimo-puesto {
+    display: inline-block;
+    vertical-align: middle;
+    animation: giro-clown 8s linear infinite;
+    color: #e53935;
+    font-weight: bold;
+    text-shadow: 0 2px 8px #fff, 0 0 2px #e53935;
+}
+
+@keyframes giro-clown {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.emoji-clown, .emoji-poop {
+    font-size: 1.1em;
+    vertical-align: middle;
+    margin: 0 2px;
+}
 /* ESTILOS GENERALES Y RESET */
 :root {
     --color-principal: #143e68;
