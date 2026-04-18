@@ -1,12 +1,21 @@
-﻿// ====================================================================
-// 0. GESTIÓN DE LOCAL STORAGE (PERSISTENCIA DE DATOS MULTI-USUARIO)
-// ====================================================================
+﻿
+
+
+/** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
+function ph(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) + h) ^ str.charCodeAt(i);
+        h = h >>> 0;
+    }
+    return h.toString(16);
+}
 
 // --- Detección de Perfil y Configuración ---
 let storageKey;
 let passwordReiniciar;
 const esPaginaPartidos = window.location.pathname.includes('partidos.html');
-const CONTRASENA_CAMBIO_PERFIL = "OvejaBandolera";
+const CONTRASENA_CAMBIO_PERFIL = "29dae08e";
 const REGEX_PERFIL = /perfil-(\w+)\.html/; // Compilar regex una sola vez
 
 // Obtener la parte del nombre del archivo de la URL (ej: 'perfil-tomas')
@@ -68,23 +77,23 @@ const perfilNombre = perfilMatch ? perfilMatch[1] : null;
 // Mapa de configuración para todos los perfiles
 const perfilesConfig = {
     // Tu perfil (partidos.html)
-    partidos: { key: 'pronosticosMundial', password: 'Mundial2026'  },
+    partidos: { key: 'pronosticosMundial', password: '78d84535'  },
     
     // Perfiles de Jugadores
-    tomas: { key: 'pronosticosMundial_Tomas', password: 'Tomas2026' },
-    miguel: { key: 'pronosticosMundial_Miguel', password: 'Miguel2026' },
-    sofia: { key: 'pronosticosMundial_Sofia', password: 'Sofia2026' },
-    inma: { key: 'pronosticosMundial_Inma', password: 'Inma2026' },
-    manolo: { key: 'pronosticosMundial_Manolo', password: 'Manolo2026' },
-    martina: { key: 'pronosticosMundial_Martina', password: 'Martina2026' },
-    adri: { key: 'pronosticosMundial_Adri', password: 'Adri2026' },
-    fuen: { key: 'pronosticosMundial_Fuen', password: 'Fuen2026' },
-    isa: { key: 'pronosticosMundial_Isa', password: 'Isa2026' },
-    jose: { key: 'pronosticosMundial_Jose', password: 'Jose2026' },
-    maria: { key: 'pronosticosMundial_Maria', password: 'Maria2026' },
-    moi: { key: 'pronosticosMundial_Moi', password: 'Moi2026' },
-    alba: { key: 'pronosticosMundial_Alba', password: 'Alba2026' },
-    enrique: { key: 'pronosticosMundial_Enrique', password: 'Enrique2026' },
+    tomas: { key: 'pronosticosMundial_Tomas', password: 'bd9de6e7' },
+    miguel: { key: 'pronosticosMundial_Miguel', password: '851091c' },
+    sofia: { key: 'pronosticosMundial_Sofia', password: '136ce531' },
+    inma: { key: 'pronosticosMundial_Inma', password: 'fcb3a3e8' },
+    manolo: { key: 'pronosticosMundial_Manolo', password: '54fa0acd' },
+    martina: { key: 'pronosticosMundial_Martina', password: '50897f8f' },
+    adri: { key: 'pronosticosMundial_Adri', password: '9add415d' },
+    fuen: { key: 'pronosticosMundial_Fuen', password: 'ddd34d1b' },
+    isa: { key: 'pronosticosMundial_Isa', password: 'a2b56118' },
+    jose: { key: 'pronosticosMundial_Jose', password: '1e4188d0' },
+    maria: { key: 'pronosticosMundial_Maria', password: '7aa6775' },
+    moi: { key: 'pronosticosMundial_Moi', password: '40c70d88' },
+    alba: { key: 'pronosticosMundial_Alba', password: 'dcdce14d' },
+    enrique: { key: 'pronosticosMundial_Enrique', password: '48c76af2' },
     // Añade más perfiles aquí si es necesario
 };
 
@@ -161,7 +170,7 @@ if (perfilNombre) {
 } else {
     // Fallback por defecto (ej. si estamos en index.html, aunque no debería interactuar)
     storageKey = 'pronosticosMundial';
-    passwordReiniciar = 'Mundial2026';
+    passwordReiniciar = '78d84535';
 }
 
 /**
@@ -642,6 +651,14 @@ function generarEstructuraPartidos() {
     const contenedorGrupos = document.getElementById("contenedor-grupos");
     const contenedorTabs = document.getElementById("group-tabs");
 
+    // Sub-contenedores para grupos y eliminatorias
+    const tabsGruposDiv = document.createElement('div');
+    tabsGruposDiv.className = 'tabs-grupos';
+    const tabsElimDiv = document.createElement('div');
+    tabsElimDiv.className = 'tabs-eliminatorias';
+    contenedorTabs.appendChild(tabsGruposDiv);
+    contenedorTabs.appendChild(tabsElimDiv);
+
     // 1. GENERAR PESTAÑAS Y CONTENIDO DE GRUPOS
     gruposData.forEach((grupo, index) => {
         const idGrupo = `grupo-${grupo.nombre.toLowerCase()}`;
@@ -649,7 +666,7 @@ function generarEstructuraPartidos() {
         // Crear botón de pestaña (Tab)
         const button = document.createElement('button');
         button.className = 'tab-button';
-        button.textContent = `Grupo ${grupo.nombre}`;
+        button.innerHTML = `Grupo ${grupo.nombre}<span class="tab-equipos">${grupo.equipos.join(' · ')}</span>`;
         button.dataset.target = idGrupo;
         
         // Crear contenido del grupo (Section)
@@ -696,7 +713,7 @@ function generarEstructuraPartidos() {
 
         section.innerHTML = htmlContent;
         
-        contenedorTabs.appendChild(button);
+        tabsGruposDiv.appendChild(button);
         contenedorGrupos.appendChild(section);
 
         // Activar el primer grupo (Grupo A) por defecto al cargar
@@ -720,7 +737,7 @@ function generarEstructuraPartidos() {
         buttonRonda.className = 'tab-button';
         buttonRonda.textContent = rondaData.nombre;
         buttonRonda.dataset.target = rondaData.id;
-        contenedorTabs.appendChild(buttonRonda);
+        tabsElimDiv.appendChild(buttonRonda);
 
         const sectionRonda = document.createElement('section');
         sectionRonda.className = 'grupo';
@@ -1070,7 +1087,7 @@ function manejarPronostico(event) {
         guardarPronosticos();
     } else if (boton.classList.contains('btn-cambiar')) {
         const pass = prompt('Introduce la contraseña para modificar este pronóstico:');
-        if (pass !== passwordReiniciar) {
+        if (ph(pass) !== passwordReiniciar) {
             if (pass !== null) {
                 alert('Contraseña incorrecta. No se ha modificado el pronóstico.');
             }
@@ -1464,7 +1481,7 @@ function manejarPronosticoEliminatoria(event) {
         
     } else if (esCambiar) {
         const pass = prompt("Introduce la contraseña para cambiar el ganador:");
-        if (pass !== passwordReiniciar) {
+        if (ph(pass) !== passwordReiniciar) {
             if (pass !== null) {
                 alert("Contraseña incorrecta. No se ha modificado el ganador.");
             }
@@ -1602,6 +1619,59 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 2. Escuchar eventos en el contenedor principal (para Confirmar/Cambiar de GRUPOS)
     contenedorGrupos.addEventListener('click', manejarPronostico);
+
+    // Mostrar acertantes exactos al pasar el ratón (hover)
+    contenedorGrupos.addEventListener('mouseover', async (event) => {
+        const boton = event.target;
+        if (boton.classList && boton.classList.contains('btn-acertantes-exactos')) {
+            // Evitar mostrar múltiples tooltips
+            if (document.getElementById('tooltip-acertantes-exactos')) return;
+            const nombrePartido = boton.dataset.partido;
+            let lista = [];
+            try {
+                lista = await (firebaseDisponible ? obtenerAcertantesExactosAsync(nombrePartido) : Promise.resolve(obtenerAcertantesExactos(nombrePartido)));
+            } catch (e) {
+                lista = null;
+            }
+            const mensaje = (lista && lista.length)
+                ? `Acertantes exactos (${lista.length}):\n- ${lista.join('\n- ')}`
+                : (lista === null ? 'No se pudieron calcular los acertantes exactos.' : 'Nadie ha acertado este resultado exacto todavía.');
+
+            // Crear tooltip flotante
+            const tooltip = document.createElement('div');
+            tooltip.id = 'tooltip-acertantes-exactos';
+            tooltip.textContent = '';
+            mensaje.split('\n').forEach(linea => {
+                tooltip.appendChild(document.createTextNode(linea));
+                tooltip.appendChild(document.createElement('br'));
+            });
+            tooltip.style.position = 'absolute';
+            tooltip.style.zIndex = 9999;
+            tooltip.style.background = '#fff';
+            tooltip.style.color = '#143e68';
+            tooltip.style.border = '2px solid #2196f3';
+            tooltip.style.borderRadius = '8px';
+            tooltip.style.boxShadow = '0 4px 16px rgba(33,150,243,0.15)';
+            tooltip.style.padding = '10px 16px';
+            tooltip.style.fontSize = '1em';
+            tooltip.style.whiteSpace = 'pre';
+            tooltip.style.pointerEvents = 'none';
+
+            // Posicionar cerca del botón
+            const rect = boton.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX + rect.width/2}px`;
+            tooltip.style.top = `${rect.top + window.scrollY + rect.height + 8}px`;
+
+            document.body.appendChild(tooltip);
+        }
+    });
+    contenedorGrupos.addEventListener('mouseout', (event) => {
+        const boton = event.target;
+        if (boton.classList && boton.classList.contains('btn-acertantes-exactos')) {
+            const tooltip = document.getElementById('tooltip-acertantes-exactos');
+            if (tooltip) tooltip.remove();
+        }
+    });
     
     // 3. Escuchar eventos en el contenedor principal (para ELIMINATORIAS - CLIC)
     contenedorGrupos.addEventListener('click', manejarPronosticoEliminatoria);
@@ -1624,7 +1694,7 @@ function reiniciarPronosticos() {
     // Usamos la variable global 'passwordReiniciar'
     const password = prompt(`Introduce la contraseña para reiniciar los resultados de ${storageKey.replace('pronosticosMundial_', '').replace('pronosticosMundial', 'este perfil')}:`);
     
-    if (password === passwordReiniciar) {
+    if (ph(password) === passwordReiniciar) {
         borrarPronosticosAsync(docIdActual || DOC_ID_OFICIALES)
             .then(() => {
                 alert(`¡Todos los pronósticos de este perfil han sido reiniciados! La página se recargará ahora.`);
@@ -1647,9 +1717,9 @@ async function reiniciarTodo() {
     
     if (!password) return; // Cancelado por el usuario
     
-    const passwordMaestra = 'OvejaBandolera'; // Contraseña maestra
+    const passwordMaestra = '29dae08e'; // Contraseña maestra (hash)
     
-    if (password !== passwordMaestra) {
+    if (ph(password) !== passwordMaestra) {
         alert("Contraseña incorrecta. El reinicio ha sido cancelado.");
         return;
     }
