@@ -415,6 +415,7 @@ h2 {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .btn-confirmar,
@@ -463,7 +464,8 @@ h2 {
     perspective: 800px;
     display: inline-block;
     height: 36px;
-    min-width: 160px;
+    width: 160px;
+    min-width: 0;
     position: relative;
     vertical-align: middle;
 }
@@ -541,6 +543,21 @@ h2 {
     font-size: 12px;
     line-height: 1;
     visibility: hidden;
+}
+
+@media (max-width: 600px) {
+    .partido-card {
+        grid-template-columns: auto 1fr;
+    }
+    .partido-card .acciones {
+        grid-column: 1 / -1;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .flip-acertantes {
+        width: 100%;
+        flex: 1 1 100%;
+    }
 }
 
 .confirmado-check.visible {
