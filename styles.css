@@ -413,20 +413,68 @@ h2 {
 
 .acciones {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
+
 .btn-confirmar,
 .btn-cambiar {
-    border: none;
-    padding: 8px 12px;
+    min-width: 0;
+    width: 100px;
+    max-width: 120px;
+    height: 32px;
+    font-size: 0.95em;
+    margin: 0;
     border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-    font-size: 0.9em;
+    padding: 0 8px;
+    flex: 1 1 0;
+}
+
+.flip-acertantes {
+    min-width: 0;
+    width: 220px;
+    max-width: 260px;
+    height: 38px;
+    font-size: 0.85em;
+    margin: 0;
+    border-radius: 6px;
+    padding: 0 10px;
+    flex: 1 1 0;
+}
+
+.flip-acertantes {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.flip-front {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .acciones {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .btn-confirmar,
+  .btn-cambiar,
+  .flip-acertantes {
+    width: 90px;
+    max-width: 100px;
+    height: 32px;
+    font-size: 0.95em;
+  }
 }
 
 .btn-confirmar {
@@ -482,6 +530,23 @@ h2 {
     transform: rotateY(180deg);
 }
 
+/* Cuando está girado, el back hace overlay sin afectar el layout */
+.flip-acertantes.flipped {
+    z-index: 50;
+    position: relative;
+    overflow: visible;
+}
+
+.flip-acertantes.flipped .flip-back {
+    height: auto;
+    min-height: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    top: 0;
+    left: 0;
+    width: max(100%, 160px);
+}
+
 .flip-front,
 .flip-back {
     position: absolute;
@@ -526,6 +591,8 @@ h2 {
     line-height: 1.3;
     overflow: hidden;
     word-break: break-word;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .confirmado-check {
@@ -733,33 +800,6 @@ footer {
 #contenedor-grupos .grupo.active {
     display: block; /* Muestra el grupo activo */
 }
-/* --- ESTILOS DE TABLA DE CLASIFICACIÓN DENTRO DE GRUPOS --- */
-
-.tabla-clasificacion-grupo {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-    font-size: 0.9em;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    background-color: white;
-}
-
-.tabla-clasificacion-grupo thead {
-    background-color: var(--color-principal);
-    color: white;
-}
-
-.tabla-clasificacion-grupo th, .tabla-clasificacion-grupo td {
-    padding: 8px 10px;
-    text-align: left;
-    border: 1px solid #ddd;
-}
-
-.tabla-clasificacion-grupo tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Colores de Posición */
 /* --- ESTILOS DE TABLA DE CLASIFICACIÓN DENTRO DE GRUPOS --- */
 
 .tabla-clasificacion-grupo {
@@ -1220,3 +1260,4 @@ body.perfil-page .tab-button {
     margin-bottom: 8px;
     line-height: 1.5;
 }
+
