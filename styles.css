@@ -13,10 +13,17 @@
     100% { transform: rotate(360deg); }
 }
 
-.emoji-clown, .emoji-poop {
+.emoji-clown, .emoji-poop, .emoji-podio {
     font-size: 1.1em;
     vertical-align: middle;
     margin: 0 2px;
+}
+
+.emoji-corona {
+    font-size: 1.7em;
+    vertical-align: middle;
+    margin: 0 4px;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8));
 }
 /* ESTILOS GENERALES Y RESET */
 :root {
@@ -305,6 +312,37 @@ h2 {
     animation: brillo 3s linear infinite, pulso 2s ease-in-out infinite;
     box-shadow: 4px 2px 20px 3px rgba(253, 185, 39, 0.7);
 }
+
+#tabla-clasificacion tbody tr.puesto-plata {
+    font-weight: bold;
+    color: #263238;
+    background: linear-gradient(90deg, #b2b4b6, #a4a4a4, #cbccce);
+    background-size: 200% 200%;
+    animation: brillo-plata 3s linear infinite, pulso 2s ease-in-out infinite;
+    box-shadow: 3px 2px 16px rgba(100, 101, 102, 0.65);
+}
+
+#tabla-clasificacion tbody tr.puesto-bronce {
+    font-weight: bold;
+    color: #4e342e;
+    background: linear-gradient(90deg, #d7a06d, #b87333, #e5b07d);
+    background-size: 200% 200%;
+    animation: brillo-bronce 3s linear infinite, pulso 2s ease-in-out infinite;
+    box-shadow: 3px 2px 16px rgba(184, 115, 51, 0.55);
+}
+
+@keyframes brillo-plata {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes brillo-bronce {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 @keyframes pulso {
     0%, 100% {
         transform: scale(1);

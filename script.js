@@ -400,6 +400,15 @@ async function actualizarClasificacionIndex(useAsync = false) {
     clasificacion.forEach((item, index) => {
         const posicion = index + 1;
         const fila = document.createElement('tr');
+        const emojiPodio = posicion === 2 ? '🥈' : posicion === 3 ? '🥉' : '';
+        const emojiCorona = posicion === 1 ? '<span class="emoji-corona">👑</span>' : '';
+
+        if (posicion === 2) {
+            fila.classList.add('puesto-plata');
+        } else if (posicion === 3) {
+            fila.classList.add('puesto-bronce');
+        }
+
         // Último puesto
         if (index === clasificacion.length - 1) {
             fila.innerHTML = `
@@ -410,7 +419,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
             `;
         } else {
             fila.innerHTML = `
-                <td>${posicion}</td>
+                <td>${posicion}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
                 <td>${item.aciertos}</td>
