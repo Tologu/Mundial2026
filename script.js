@@ -427,6 +427,9 @@ async function actualizarClasificacionIndex(useAsync = false) {
         }
         tbody.appendChild(fila);
     });
+
+    // Revelar la tabla con fade-in (evita el flash de contenido estático)
+    tabla.classList.add('tabla-lista');
 }
 
 // Alias para compatibilidad hacia atrás

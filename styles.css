@@ -304,12 +304,21 @@ h2 {
     background-color: rgba(253, 185, 39, 0.1);
 }
 
+/* Ocultar tbody hasta que JS lo rellene (evita flash de contenido antiguo) */
+#tabla-clasificacion tbody {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+#tabla-clasificacion.tabla-lista tbody {
+    opacity: 1;
+}
+
 #tabla-clasificacion tbody tr:first-child {
     font-weight: bold;
     color: black;
     background: linear-gradient(90deg, #ffe082, #fdb927, #ffe082);
     background-size: 200% 200%;
-    animation: brillo 3s linear infinite, pulso 2s ease-in-out infinite;
+    animation: brillo 3s linear infinite, pulso 6s ease-in-out infinite;
     box-shadow: 4px 2px 20px 3px rgba(253, 185, 39, 0.7);
 }
 
@@ -318,7 +327,7 @@ h2 {
     color: #263238;
     background: linear-gradient(90deg, #b2b4b6, #a4a4a4, #cbccce);
     background-size: 200% 200%;
-    animation: brillo-plata 3s linear infinite, pulso 2s ease-in-out infinite;
+    animation: brillo-plata 3s linear infinite, pulso 6s ease-in-out infinite;
     box-shadow: 3px 2px 16px rgba(100, 101, 102, 0.65);
 }
 
@@ -327,7 +336,7 @@ h2 {
     color: #4e342e;
     background: linear-gradient(90deg, #d7a06d, #b87333, #e5b07d);
     background-size: 200% 200%;
-    animation: brillo-bronce 3s linear infinite, pulso 2s ease-in-out infinite;
+    animation: brillo-bronce 3s linear infinite, pulso 6s ease-in-out infinite;
     box-shadow: 3px 2px 16px rgba(184, 115, 51, 0.55);
 }
 
