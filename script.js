@@ -411,6 +411,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
 
         // Último puesto
         if (index === clasificacion.length - 1) {
+            fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
                 <td>${posicion} <span class=\"emoji-clown\">🤡</span></td>
                 <td><a href=\"perfil-${item.slug}.html\" class=\"ultimo-puesto\">${item.nombreVisible}</a></td>
@@ -422,7 +423,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td>${posicion}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
-                <td>${item.aciertos}</td>
+                <td>${item.aciertos}${posicion === 1 ? ' <span class="premio-primero">+28€</span>' : ''}</td>
             `;
         }
         tbody.appendChild(fila);

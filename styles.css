@@ -19,6 +19,22 @@
     margin: 0 2px;
 }
 
+.premio-primero {
+    float: right;
+    color: #1b5e20;
+    background-color: #c8e6c9;
+    font-weight: 700;
+    font-size: 0.85em;
+    padding: 1px 7px;
+    border-radius: 20px;
+    border: 1px solid #388e3c;
+    letter-spacing: 0.03em;
+}
+
+#tabla-clasificacion tbody tr:first-child td:last-child {
+    position: relative;
+}
+
 .emoji-corona {
     font-size: 1.7em;
     vertical-align: middle;
@@ -257,7 +273,10 @@ h2 {
 
 /* CLASIFICACIÓN (index.html) */
 #tabla-clasificacion {
-    width: 100%;
+    width: auto;
+    min-width: 400px;
+    max-width: 820px;
+    margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
     box-shadow: 0 2px 15px rgba(20, 62, 104, 0.15);
