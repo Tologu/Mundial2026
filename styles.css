@@ -855,6 +855,16 @@ footer {
     background-color: #e0e0e0;
 }
 
+.tabs-eliminatorias .tab-button {
+    background-color: var(--color-principal);
+    color: white;
+}
+
+.tabs-eliminatorias .tab-button:hover {
+    background-color: #1a5a96;
+    color: white;
+}
+
 .tab-equipos {
     display: block;
     font-size: 0.65em;
@@ -875,6 +885,31 @@ footer {
     border-bottom: 2px solid var(--color-secundario);
     margin-bottom: -2px; /* Superpone el borde inferior */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* Sombra sutil arriba */
+}
+
+.tab-button-final {
+    background: linear-gradient(135deg, #b8860b, #ffd700, #b8860b);
+    color: #1a1a1a;
+    font-size: 1em;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    padding: 12px 22px;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.tab-button-final:hover {
+    background: linear-gradient(135deg, #ffd700, #ffe84d, #ffd700);
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.8);
+    color: #000;
+}
+
+.tab-button-final.active {
+    background: linear-gradient(135deg, #ffd700, #ffe84d, #ffd700);
+    color: #000;
+    border-bottom: 2px solid #b8860b;
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.7);
 }
 
 /* Reglas para mostrar/ocultar el contenido de los grupos */
