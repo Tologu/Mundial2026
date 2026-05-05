@@ -72,6 +72,10 @@ body {
     line-height: 1.6;
 }
 
+body.pagina-partidos {
+    background-color: #eaf2fb;
+}
+
 /* HEADER Y NAVEGACIÓN */
 header {
     background-color: var(--color-principal);
