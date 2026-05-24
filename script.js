@@ -739,7 +739,7 @@ function formatearTimestamp(isoString) {
  */
 function infoTimestampHtml(ts) {
     if (!ts) return '';
-    return `<button class="btn-info-timestamp" type="button" data-ts="${ts}" aria-label="Ver hora de confirmación">ℹ<span class="tooltip-ts">📅 Grabado el ${formatearTimestamp(ts)}</span></button>`;
+    return `<button class="btn-info-timestamp" type="button" data-ts="${ts}" aria-label="Ver hora de confirmación">i<span class="tooltip-ts">📅 Grabado el ${formatearTimestamp(ts)}</span></button>`;
 }
 
 function generarEstructuraPartidos() {

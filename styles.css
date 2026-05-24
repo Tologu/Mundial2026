@@ -84,23 +84,30 @@
 /* Círculo de información de timestamp en cards de partido */
 .btn-info-timestamp {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
+    display: inline-block;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
     border-radius: 50%;
     background: #1565c0;
     color: #fff;
     border: none;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    font-style: italic;
-    font-family: Georgia, serif;
+    padding: 0;
+    margin: 0;
     margin-left: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    font-style: normal;
+    font-family: Arial, sans-serif;
+    line-height: 20px;
+    text-align: center;
     vertical-align: middle;
     flex-shrink: 0;
+    box-sizing: border-box;
     transition: background 0.2s, transform 0.15s;
     z-index: 1;
 }
