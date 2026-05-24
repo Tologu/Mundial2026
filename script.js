@@ -367,6 +367,53 @@ async function actualizarClasificacionIndex(useAsync = false) {
         ? await cargarPronosticosOficialesAsync()
         : cargarPronosticosPorClave(perfilesConfig.partidos.key);
 
+    // --- Aviso de último resultado confirmado ---
+    const avisoEl = document.getElementById('ultimo-resultado-aviso');
+    if (avisoEl) {
+        let ultimoClave = null, ultimoTs = null, ultimoDato = null;
+        Object.entries(pronosticosOficiales).forEach(([clave, dato]) => {
+            if (!dato || !dato.timestamp) return;
+            if (!ultimoTs || dato.timestamp > ultimoTs) {
+                ultimoTs = dato.timestamp;
+                ultimoClave = clave;
+                ultimoDato = dato;
+            }
+        });
+        if (ultimoClave && ultimoDato) {
+            let textoPartido = '';
+            if (ultimoClave.includes(' vs ')) {
+                const [loc, vis] = ultimoClave.split(' vs ');
+                textoPartido = `${loc} <strong>${ultimoDato.local}–${ultimoDato.visitante}</strong> ${vis}`;
+            } else {
+                textoPartido = `${ultimoClave}: <strong>${ultimoDato.ganador || '?'}</strong>`;
+            }
+
+            // Buscar acertantes exactos del último partido (solo fase de grupos)
+            let textoAcertantes = '';
+            if (ultimoClave.includes(' vs ') &&
+                typeof ultimoDato.local === 'number' &&
+                typeof ultimoDato.visitante === 'number') {
+                const acertantes = await (firebaseDisponible
+                    ? obtenerAcertantesExactosAsync(ultimoClave)
+                    : Promise.resolve(obtenerAcertantesExactos(ultimoClave)));
+                if (acertantes && acertantes.length > 0) {
+                    const nombres = acertantes.join(' y ');
+                    const verbo = acertantes.length === 1 ? 'acertó' : 'acertaron';
+                    textoAcertantes = ` — 🎯 <strong>${nombres}</strong> ${verbo} el resultado exacto!`;
+                }
+            }
+
+            const textoCompleto = `Última actualización: ${textoPartido}${textoAcertantes}`;
+            if (textoAcertantes) {
+                avisoEl.innerHTML = `<span class="aviso-scroll">${textoCompleto}</span>`;
+            } else {
+                avisoEl.innerHTML = textoCompleto;
+            }
+        } else {
+            avisoEl.innerHTML = '';
+        }
+    }
+
     let clasificacion;
     
     if (useAsync) {
@@ -1837,6 +1884,10 @@ async function reiniciarTodo() {
             localStorage.removeItem('ranking_curr_mundial');
             localStorage.removeItem('scores_hash_mundial');
         } catch (_) {}
+
+        // Limpiar el aviso de última actualización
+        const avisoEl = document.getElementById('ultimo-resultado-aviso');
+        if (avisoEl) avisoEl.innerHTML = '';
 
         window.location.reload();
     } catch (e) {
