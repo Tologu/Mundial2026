@@ -1830,6 +1830,14 @@ async function reiniciarTodo() {
         }
         
         alert('¡TODOS los pronósticos han sido reiniciados! La página se recargará ahora.');
+
+        // Limpiar el historial de ranking para que todos muestren guion al recargar
+        try {
+            localStorage.removeItem('ranking_prev_mundial');
+            localStorage.removeItem('ranking_curr_mundial');
+            localStorage.removeItem('scores_hash_mundial');
+        } catch (_) {}
+
         window.location.reload();
     } catch (e) {
         console.error(e);
