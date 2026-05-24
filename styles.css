@@ -87,34 +87,23 @@
     display: inline-block;
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
-    border-radius: 50%;
-    background: #1565c0;
-    color: #fff;
+    background: none;
     border: none;
     padding: 0;
     margin: 0;
     margin-left: 6px;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    font-style: normal;
-    font-family: Arial, sans-serif;
-    line-height: 20px;
-    text-align: center;
+    font-size: 16px;
+    line-height: 1;
     vertical-align: middle;
     flex-shrink: 0;
     box-sizing: border-box;
-    transition: background 0.2s, transform 0.15s;
+    transition: transform 0.15s;
     z-index: 1;
 }
 
 .btn-info-timestamp:hover {
-    background: #0d47a1;
-    transform: scale(1.15);
+    transform: scale(1.2);
 }
 
 .tooltip-ts {
