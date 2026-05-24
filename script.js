@@ -396,13 +396,32 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const tbody = tabla.querySelector('tbody');
     if (!tbody) return;
 
-    // Cargar ranking anterior para mostrar flechas de movimiento
-    const RANKING_KEY = 'ranking_anterior_mundial';
+    // Sistema de flechas persistentes:
+    // RANKING_PREV: ranking antes del último cambio de puntos (para comparar)
+    // RANKING_CURR: ranking del último render (pasa a PREV cuando cambian puntos)
+    // SCORES_KEY:   hash de puntos del último render (detecta cambios reales)
+    const RANKING_PREV_KEY = 'ranking_prev_mundial';
+    const RANKING_CURR_KEY = 'ranking_curr_mundial';
+    const SCORES_KEY = 'scores_hash_mundial';
+
     let rankingAnterior = {};
+    let rankingCurr = {};
+    let storedScoresHash = '';
     try {
-        const raw = localStorage.getItem(RANKING_KEY);
-        if (raw) rankingAnterior = JSON.parse(raw);
+        rankingAnterior = JSON.parse(localStorage.getItem(RANKING_PREV_KEY) || '{}');
+        rankingCurr    = JSON.parse(localStorage.getItem(RANKING_CURR_KEY) || '{}');
+        storedScoresHash = localStorage.getItem(SCORES_KEY) || '';
     } catch (e) { /* ignorar */ }
+
+    // Hash de puntos actual: slug:puntos:aciertos por participante (ordenado)
+    const currentScoresHash = clasificacion
+        .map(item => `${item.slug}:${item.puntos}:${item.aciertos}`)
+        .sort()
+        .join('|');
+
+    // Mapa del ranking actual
+    const currentRanking = {};
+    clasificacion.forEach((item, idx) => { currentRanking[item.slug] = idx + 1; });
 
     tbody.innerHTML = '';
     clasificacion.forEach((item, index) => {
@@ -450,11 +469,19 @@ async function actualizarClasificacionIndex(useAsync = false) {
         tbody.appendChild(fila);
     });
 
-    // Guardar ranking actual para comparación futura
+    // Solo actualizar el snapshot si los puntos cambiaron (nueva confirmación de resultado)
+    // Así las flechas persisten entre recargas de página
     try {
-        const nuevoRanking = {};
-        clasificacion.forEach((item, idx) => { nuevoRanking[item.slug] = idx + 1; });
-        localStorage.setItem(RANKING_KEY, JSON.stringify(nuevoRanking));
+        if (currentScoresHash !== storedScoresHash) {
+            // Los puntos cambiaron: el ranking "actual" anterior pasa a ser el "previo"
+            // (comparación para flechas) y guardamos el nuevo como "actual"
+            localStorage.setItem(RANKING_PREV_KEY, JSON.stringify(rankingCurr));
+            localStorage.setItem(RANKING_CURR_KEY, JSON.stringify(currentRanking));
+            localStorage.setItem(SCORES_KEY, currentScoresHash);
+        } else {
+            // Sin cambio de puntos (recarga): solo actualizamos CURR por seguridad
+            localStorage.setItem(RANKING_CURR_KEY, JSON.stringify(currentRanking));
+        }
     } catch (e) { /* ignorar */ }
 
     // Revelar la tabla con fade-in (evita el flash de contenido estático)
@@ -698,6 +725,23 @@ const encadenamientoBracket = {
 // 2. GENERACIÓN DE ESTRUCTURA Y PESTAÑAS (TABS)
 // ====================================================================
 
+/**
+ * Formatea un ISO timestamp a "DD/MM/YYYY HH:MM:SS" en hora local.
+ */
+function formatearTimestamp(isoString) {
+    const d = new Date(isoString);
+    const p = n => String(n).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} a las ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+/**
+ * Devuelve el HTML del círculo ℹ de timestamp para una card de partido.
+ */
+function infoTimestampHtml(ts) {
+    if (!ts) return '';
+    return `<button class="btn-info-timestamp" type="button" data-ts="${ts}" aria-label="Ver hora de confirmación">ℹ<span class="tooltip-ts">📅 Grabado el ${formatearTimestamp(ts)}</span></button>`;
+}
+
 function generarEstructuraPartidos() {
     const contenedorGrupos = document.getElementById("contenedor-grupos");
     const contenedorTabs = document.getElementById("group-tabs");
@@ -739,6 +783,7 @@ function generarEstructuraPartidos() {
           const checkConfirmadoHtml = esPaginaPartidos
             ? `<span class="confirmado-check ${resultadoGuardado ? 'visible' : ''}" aria-hidden="true">✔</span>`
             : '';
+          const tsHtml = infoTimestampHtml(resultadoGuardado?.timestamp);
 
 
           htmlContent += `
@@ -756,6 +801,7 @@ function generarEstructuraPartidos() {
               <div class="acciones">
                 ${checkConfirmadoHtml}<button class="btn-confirmar" ${btnConfirmarDisabled}>Confirmar</button>
                 <button class="btn-cambiar" ${btnCambiarDisabled}>Cambiar</button>
+                ${tsHtml}
                 ${esPaginaPartidos ? `<div class="flip-acertantes" data-partido="${nombrePartido}"><div class="flip-inner"><div class="flip-front">Acertantes Exactos</div><div class="flip-back"><div class="flip-back-content">Cargando...</div></div></div></div>` : ''}
               </div>
             </div>
@@ -1097,7 +1143,8 @@ function manejarPronostico(event) {
         pronosticosConfirmados[nombrePartido] = {
             local: golLocal,
             visitante: golVisitante,
-            grupo: grupoNombre
+            grupo: grupoNombre,
+            timestamp: new Date().toISOString()
         };
 
             // Si estamos en partidos.html y es la final, guardar el ganador en los oficiales
@@ -1118,6 +1165,14 @@ function manejarPronostico(event) {
         btnConfirmar.disabled = true;
         btnCambiar.disabled = false;
         if (checkConfirmado) checkConfirmado.classList.add('visible');
+
+        // Inyectar o actualizar el círculo de info de timestamp en el DOM
+        const tsExistente = partidoCard.querySelector('.btn-info-timestamp');
+        if (tsExistente) tsExistente.remove();
+        partidoCard.querySelector('.acciones').insertAdjacentHTML(
+            'beforeend',
+            infoTimestampHtml(pronosticosConfirmados[nombrePartido].timestamp)
+        );
 
         guardarPronosticos();
     } else if (boton.classList.contains('btn-cambiar')) {
@@ -1457,6 +1512,7 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                      ${perfilNombre && puntosPartido > 0 ? 
                         `<div class="puntos-ronda">+${puntosPartido}</div>`
                        : ''}
+                     ${resultadoGuardado.timestamp && yaHayGanador ? infoTimestampHtml(resultadoGuardado.timestamp) : ''}
                      ${yaHayGanador && !EQUIPO_1_TBD && !EQUIPO_2_TBD ? 
                         `<div class="acciones-elim">
                             <button class="btn-cambiar-elim-clic" data-llave="${nombreLlave}">Cambiar Ganador</button>
@@ -1511,8 +1567,9 @@ function manejarPronosticoEliminatoria(event) {
     if (esConfirmar) {
         const equipoGanador = boton.dataset.equipo;
         
-        // 1. Guardar el ganador
+        // 1. Guardar el ganador y el timestamp
         pronosticosConfirmados[llavePartido].ganador = equipoGanador;
+        pronosticosConfirmados[llavePartido].timestamp = new Date().toISOString();
         
     } else if (esCambiar) {
         const pass = prompt("Introduce la contraseña para cambiar el ganador:");
@@ -1522,8 +1579,9 @@ function manejarPronosticoEliminatoria(event) {
             }
             return;
         }
-        // 1. Eliminar el ganador
+        // 1. Eliminar el ganador y timestamp
         delete pronosticosConfirmados[llavePartido].ganador;
+        delete pronosticosConfirmados[llavePartido].timestamp;
         
         // También aseguramos que no quede ningún marcador remanente si lo hubiera
         delete pronosticosConfirmados[llavePartido].local;
@@ -1697,6 +1755,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 3. Escuchar eventos en el contenedor principal (para ELIMINATORIAS - CLIC)
     contenedorGrupos.addEventListener('click', manejarPronosticoEliminatoria);
+
+    // 4. Toggle de tooltips de timestamp al hacer clic
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-info-timestamp');
+        if (btn) {
+            const activo = btn.classList.contains('activo');
+            document.querySelectorAll('.btn-info-timestamp.activo').forEach(b => b.classList.remove('activo'));
+            if (!activo) btn.classList.add('activo');
+        } else {
+            document.querySelectorAll('.btn-info-timestamp.activo').forEach(b => b.classList.remove('activo'));
+        }
+    });
 
     // 4. Manejo del botón de reinicio
     const btnReiniciar = document.getElementById('btn-reiniciar-app');
