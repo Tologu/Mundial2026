@@ -414,16 +414,14 @@ async function actualizarClasificacionIndex(useAsync = false) {
         // Calcular flecha de movimiento
         const posAnterior = rankingAnterior[item.slug];
         let flechaHtml = '';
-        if (posAnterior !== undefined) {
-            if (posicion < posAnterior) {
-                const diff = posAnterior - posicion;
-                flechaHtml = `<span class="flecha-ranking flecha-sube" title="Subió ${diff} puesto${diff > 1 ? 's' : ''}">▲</span>`;
-            } else if (posicion > posAnterior) {
-                const diff = posicion - posAnterior;
-                flechaHtml = `<span class="flecha-ranking flecha-baja" title="Bajó ${diff} puesto${diff > 1 ? 's' : ''}">▼</span>`;
-            } else {
-                flechaHtml = `<span class="flecha-ranking flecha-igual" title="Misma posición">–</span>`;
-            }
+        if (posAnterior === undefined || posAnterior === posicion) {
+            flechaHtml = `<span class="flecha-ranking flecha-igual" title="Misma posición">–</span>`;
+        } else if (posicion < posAnterior) {
+            const diff = posAnterior - posicion;
+            flechaHtml = `<span class="flecha-ranking flecha-sube" title="Subió ${diff} puesto${diff > 1 ? 's' : ''}">▲</span>`;
+        } else {
+            const diff = posicion - posAnterior;
+            flechaHtml = `<span class="flecha-ranking flecha-baja" title="Bajó ${diff} puesto${diff > 1 ? 's' : ''}">▼</span>`;
         }
 
         if (posicion === 2) {
