@@ -310,6 +310,13 @@ function calcularPuntajePerfil(pronosticosOficiales, pronosticosPerfil) {
         });
     });
 
+    // 3) BONUS CAMPEÓN: +9 puntos si acertó el ganador de la Final (M104)
+    const campeonOficial = pronosticosOficiales['M104']?.ganador;
+    const campeonJugador = pronosticosPerfil['M104']?.ganador;
+    if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) {
+        puntos += 9;
+        aciertos += 1;
+    }
 
     return { puntos, aciertos, exactos };
 }
@@ -370,47 +377,51 @@ async function actualizarClasificacionIndex(useAsync = false) {
     // --- Aviso de último resultado confirmado ---
     const avisoEl = document.getElementById('ultimo-resultado-aviso');
     if (avisoEl) {
-        let ultimoClave = null, ultimoTs = null, ultimoDato = null;
-        Object.entries(pronosticosOficiales).forEach(([clave, dato]) => {
-            if (!dato || !dato.timestamp) return;
-            if (!ultimoTs || dato.timestamp > ultimoTs) {
-                ultimoTs = dato.timestamp;
-                ultimoClave = clave;
-                ultimoDato = dato;
-            }
-        });
-        if (ultimoClave && ultimoDato) {
-            let textoPartido = '';
-            if (ultimoClave.includes(' vs ')) {
-                const [loc, vis] = ultimoClave.split(' vs ');
-                textoPartido = `${loc} <strong>${ultimoDato.local}–${ultimoDato.visitante}</strong> ${vis}`;
-            } else {
-                textoPartido = `${ultimoClave}: <strong>${ultimoDato.ganador || '?'}</strong>`;
-            }
-
-            // Buscar acertantes exactos del último partido (solo fase de grupos)
-            let textoAcertantes = '';
-            if (ultimoClave.includes(' vs ') &&
-                typeof ultimoDato.local === 'number' &&
-                typeof ultimoDato.visitante === 'number') {
-                const acertantes = await (firebaseDisponible
-                    ? obtenerAcertantesExactosAsync(ultimoClave)
-                    : Promise.resolve(obtenerAcertantesExactos(ultimoClave)));
-                if (acertantes && acertantes.length > 0) {
-                    const nombres = acertantes.join(' y ');
-                    const verbo = acertantes.length === 1 ? 'acertó' : 'acertaron';
-                    textoAcertantes = ` — 🎯 <strong>${nombres}</strong> ${verbo} el resultado exacto!`;
+        // Si el torneo ha terminado (M104 tiene campeón), mostrar ganador de la porra al final
+        // (se actualizará después de calcular clasificacion; dejar vacío por ahora)
+        if (!pronosticosOficiales['M104']?.ganador) {
+            let ultimoClave = null, ultimoTs = null, ultimoDato = null;
+            Object.entries(pronosticosOficiales).forEach(([clave, dato]) => {
+                if (!dato || !dato.timestamp) return;
+                if (!ultimoTs || dato.timestamp > ultimoTs) {
+                    ultimoTs = dato.timestamp;
+                    ultimoClave = clave;
+                    ultimoDato = dato;
                 }
-            }
+            });
+            if (ultimoClave && ultimoDato) {
+                let textoPartido = '';
+                if (ultimoClave.includes(' vs ')) {
+                    const [loc, vis] = ultimoClave.split(' vs ');
+                    textoPartido = `${loc} <strong>${ultimoDato.local}–${ultimoDato.visitante}</strong> ${vis}`;
+                } else {
+                    textoPartido = `${ultimoClave}: <strong>${ultimoDato.ganador || '?'}</strong>`;
+                }
 
-            const textoCompleto = `Última actualización: ${textoPartido}${textoAcertantes}`;
-            if (textoAcertantes) {
-                avisoEl.innerHTML = `<span class="aviso-scroll">${textoCompleto}</span>`;
+                // Buscar acertantes exactos del último partido (solo fase de grupos)
+                let textoAcertantes = '';
+                if (ultimoClave.includes(' vs ') &&
+                    typeof ultimoDato.local === 'number' &&
+                    typeof ultimoDato.visitante === 'number') {
+                    const acertantes = await (firebaseDisponible
+                        ? obtenerAcertantesExactosAsync(ultimoClave)
+                        : Promise.resolve(obtenerAcertantesExactos(ultimoClave)));
+                    if (acertantes && acertantes.length > 0) {
+                        const nombres = acertantes.join(' y ');
+                        const verbo = acertantes.length === 1 ? 'acertó' : 'acertaron';
+                        textoAcertantes = ` — 🎯 <strong>${nombres}</strong> ${verbo} el resultado exacto!`;
+                    }
+                }
+
+                const textoCompleto = `Última actualización: ${textoPartido}${textoAcertantes}`;
+                if (textoAcertantes) {
+                    avisoEl.innerHTML = `<span class="aviso-scroll">${textoCompleto}</span>`;
+                } else {
+                    avisoEl.innerHTML = textoCompleto;
+                }
             } else {
-                avisoEl.innerHTML = textoCompleto;
+                avisoEl.innerHTML = '';
             }
-        } else {
-            avisoEl.innerHTML = '';
         }
     }
 
@@ -530,6 +541,13 @@ async function actualizarClasificacionIndex(useAsync = false) {
             localStorage.setItem(RANKING_CURR_KEY, JSON.stringify(currentRanking));
         }
     } catch (e) { /* ignorar */ }
+
+    // Si el torneo terminó, mostrar ganador de la porra en el aviso
+    if (avisoEl && pronosticosOficiales['M104']?.ganador && clasificacion.length > 0) {
+        const ganador = clasificacion[0];
+        const textoGanador = `🏆 ¡¡CAMPEÓN DE LA PORRA!! 🏆 ${ganador.nombreVisible.toUpperCase()} — ${ganador.puntos} PUNTOS · ${ganador.aciertos} ACIERTOS 🥳🎉`;
+        avisoEl.innerHTML = `<span class="aviso-scroll">${textoGanador}</span>`;
+    }
 
     // Revelar la tabla con fade-in (evita el flash de contenido estático)
     tabla.classList.add('tabla-lista');
@@ -1507,6 +1525,17 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                         puntosPartido += puntosRonda;
                     }
                 });
+                // Bonus campeón: +9 si acertó el ganador de la Final (M104)
+                if (ronda === 'Final' && p.llave === 104) {
+                    const pronOficial2 = (firebaseDisponible && pronosticosOficialesCache)
+                        ? pronosticosOficialesCache
+                        : cargarPronosticosPorClave(perfilesConfig.partidos.key);
+                    const campeonOficial = pronOficial2['M104']?.ganador;
+                    const campeonJugador = pronosticosConfirmados['M104']?.ganador;
+                    if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) {
+                        puntosPartido += 9;
+                    }
+                }
             }
 
             const nombreLlave = p.nombreCompletoLlave; // M73, M89, M104, etc.
