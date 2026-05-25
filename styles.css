@@ -31,6 +31,30 @@
     letter-spacing: 0.03em;
 }
 
+.premio-segundo {
+    float: right;
+    color: #1b5e20;
+    background-color: #c8e6c9;
+    font-weight: 700;
+    font-size: 0.85em;
+    padding: 1px 7px;
+    border-radius: 20px;
+    border: 1px solid #388e3c;
+    letter-spacing: 0.03em;
+}
+
+.premio-tercero {
+    float: right;
+    color: #1b5e20;
+    background-color: #c8e6c9;
+    font-weight: 700;
+    font-size: 0.85em;
+    padding: 1px 7px;
+    border-radius: 20px;
+    border: 1px solid #388e3c;
+    letter-spacing: 0.03em;
+}
+
 #tabla-clasificacion tbody tr:first-child td:last-child {
     position: relative;
 }

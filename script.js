@@ -1,7 +1,4 @@
-﻿
-
-
-/** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
+﻿/** Genera hash djb2 de una cadena (para comparación segura de contraseñas). */
 function ph(str) {
     let h = 5381;
     for (let i = 0; i < str.length; i++) {
@@ -80,7 +77,7 @@ const perfilesConfig = {
     partidos: { key: 'pronosticosMundial', password: '78d84535'  },
     
     // Perfiles de Jugadores
-    tomas: { key: 'pronosticosMundial_Tomas', password: 'bd9de6e7' },
+    tomas: { key: 'pronosticosMundial_Tomas', password: '4f3123f5' },
     miguel: { key: 'pronosticosMundial_Miguel', password: '851091c' },
     sofia: { key: 'pronosticosMundial_Sofia', password: '136ce531' },
     inma: { key: 'pronosticosMundial_Inma', password: 'fcb3a3e8' },
@@ -511,9 +508,9 @@ async function actualizarClasificacionIndex(useAsync = false) {
         if (index === clasificacion.length - 1) {
             fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
-                <td>${posicion}${flechaHtml} <span class=\"emoji-clown\">🤡</span></td>
-                <td><a href=\"perfil-${item.slug}.html\" class=\"ultimo-puesto\">${item.nombreVisible}</a></td>
-                <td>${item.puntos} <span class=\"emoji-poop\">💩</span></td>
+                <td>${posicion}${flechaHtml} <span class="emoji-clown">🤡</span></td>
+                <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
+                <td>${item.puntos} <span class="emoji-poop">💩</span></td>
                 <td>${item.aciertos}</td>
             `;
         } else {
@@ -521,7 +518,11 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td>${posicion}${flechaHtml}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
-                <td>${item.aciertos}${posicion === 1 ? ' <span class="premio-primero">+28€</span>' : ''}</td>
+                <td>${item.aciertos}
+                    ${posicion === 1 ? ' <span class="premio-primero">+22€</span>' : ''}
+                    ${posicion === 2 ? ' <span class="premio-segundo">+4€</span>' : ''}
+                    ${posicion === 3 ? ' <span class="premio-tercero">+2€</span>' : ''}
+                </td>
             `;
         }
         tbody.appendChild(fila);
@@ -1590,11 +1591,7 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                         `<div class="puntos-ronda">+${puntosPartido}</div>`
                        : ''}
                      ${resultadoGuardado.timestamp && yaHayGanador ? infoTimestampHtml(resultadoGuardado.timestamp) : ''}
-                     ${yaHayGanador && !EQUIPO_1_TBD && !EQUIPO_2_TBD ? 
-                        `<div class="acciones-elim">
-                            <button class="btn-cambiar-elim-clic" data-llave="${nombreLlave}">Cambiar Ganador</button>
-                         </div>` 
-                         : ''}
+
                 </div>
             `;
         });
