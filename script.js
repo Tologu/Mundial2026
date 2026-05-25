@@ -1559,12 +1559,13 @@ function renderizarRondaEliminatoria(partidos, ronda) {
             const claseEquipo1 = (ganadorElegido === p.equipo1) ? 'elegido' : '';
             const claseEquipo2 = (ganadorElegido === p.equipo2) ? 'elegido' : '';
             const disabledClase = yaHayGanador ? 'deshabilitado' : '';
+            const claseRonda = ronda === 'Final' ? 'partido-final' : '';
             
             // Condición para deshabilitar los botones de elección
             const disableButtons = (EQUIPO_1_TBD || EQUIPO_2_TBD || yaHayGanador) ? 'disabled' : '';
 
             html += `
-                <div class="partido-bracket ${TBD_CLASS} ${disabledClase}">
+                <div class="partido-bracket ${TBD_CLASS} ${disabledClase} ${claseRonda}">
                     <span class="llave">${ronda} - ${LLAVE_TITULO}</span>
                     <div class="enfrentamiento-clic">
                         <button 

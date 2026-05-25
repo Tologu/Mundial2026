@@ -1205,9 +1205,9 @@ footer {
 /* ==================================================================== */
 
 .ronda-eliminatoria {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Espacio entre cada partido de la ronda */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
     padding: 20px 0;
 }
 
@@ -1227,6 +1227,15 @@ footer {
 .partido-bracket:not(.deshabilitado):hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sombra direccional según el ganador elegido */
+.partido-bracket:has(.enfrentamiento-clic button:first-child.elegido) {
+    box-shadow: -10px 2px 16px rgba(0, 123, 255, 0.45);
+}
+
+.partido-bracket:has(.enfrentamiento-clic button:last-child.elegido) {
+    box-shadow: 10px 2px 16px rgba(0, 123, 255, 0.45);
 }
 
 /* Indicador de Llave (M73, M104, etc.) */
@@ -1289,7 +1298,7 @@ footer {
 
 .btn-equipo-ganador.elegido {
     background-color: #007bff; /* Azul primario fuerte */
-    color: #d4d709; /* Texto blanco para alto contraste */
+    color: #143e68; /* Azul corporativo */
     border-color: #0056b3;
     font-weight: bold;
     /* Efecto visual de "ganador" */
@@ -1304,12 +1313,44 @@ footer {
 }
 
 /* ---------------------------------------------------- */
+/* CARD DE LA FINAL Y 3ER PUESTO */
+/* ---------------------------------------------------- */
+
+.partido-final {
+    background-color: #fffbea;
+    border: 2px solid var(--color-secundario);
+    box-shadow: 0 4px 14px rgba(253, 185, 39, 0.45);
+}
+
+.partido-final .llave {
+    color: #a07800;
+}
+
+.partido-final .btn-equipo-ganador {
+    border-color: var(--color-secundario);
+}
+
+.partido-final .btn-equipo-ganador.elegido {
+    background-color: var(--color-secundario);
+    color: var(--color-principal);
+    border-color: #c99200;
+    box-shadow: 0 0 10px rgba(253, 185, 39, 0.6);
+}
+
+.partido-final:has(.enfrentamiento-clic button:first-child.elegido) {
+    box-shadow: -10px 2px 16px rgba(253, 185, 39, 0.6);
+}
+
+.partido-final:has(.enfrentamiento-clic button:last-child.elegido) {
+    box-shadow: 10px 2px 16px rgba(253, 185, 39, 0.6);
+}
+
+/* ---------------------------------------------------- */
 /* ESTADOS ESPECIALES */
 /* ---------------------------------------------------- */
 
 /* Partidos Completados (Deshabilitados) */
 .partido-bracket.deshabilitado {
-    border-left: 5px solid #007bff; /* Borde lateral para indicar "completo" */
     opacity: 0.9;
 }
 
