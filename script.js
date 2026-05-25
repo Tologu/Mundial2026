@@ -1591,7 +1591,11 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                         `<div class="puntos-ronda">+${puntosPartido}</div>`
                        : ''}
                      ${resultadoGuardado.timestamp && yaHayGanador ? infoTimestampHtml(resultadoGuardado.timestamp) : ''}
-
+                     ${yaHayGanador && !EQUIPO_1_TBD && !EQUIPO_2_TBD ? 
+                        `<div class="acciones-elim">
+                            <button class="btn-cambiar-elim-clic" data-llave="${nombreLlave}">Cambiar Ganador</button>
+                         </div>` 
+                         : ''}
                 </div>
             `;
         });
