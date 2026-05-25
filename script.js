@@ -292,9 +292,9 @@ function calcularPuntajePerfil(pronosticosOficiales, pronosticosPerfil) {
     const rondasElim = [
         { ronda: 'R32', puntos: 2 },
         { ronda: 'R16', puntos: 3 },
-        { ronda: 'R8',  puntos: 4 },
-        { ronda: 'R4',  puntos: 5 },
-        { ronda: 'Final', puntos: 6 }
+        { ronda: 'R8',  puntos: 5 },
+        { ronda: 'R4',  puntos: 7 },
+        { ronda: 'Final', puntos: 12 }
     ];
 
     rondasElim.forEach(({ ronda, puntos: pts }) => {
@@ -310,11 +310,11 @@ function calcularPuntajePerfil(pronosticosOficiales, pronosticosPerfil) {
         });
     });
 
-    // 3) BONUS CAMPEÓN: +9 puntos si acertó el ganador de la Final (M104)
+    // 3) BONUS CAMPEÓN: +8 puntos si acertó el ganador de la Final (M104)
     const campeonOficial = pronosticosOficiales['M104']?.ganador;
     const campeonJugador = pronosticosPerfil['M104']?.ganador;
     if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) {
-        puntos += 9;
+        puntos += 8;
         aciertos += 1;
     }
 
@@ -407,9 +407,9 @@ async function actualizarClasificacionIndex(useAsync = false) {
                         ? obtenerAcertantesExactosAsync(ultimoClave)
                         : Promise.resolve(obtenerAcertantesExactos(ultimoClave)));
                     if (acertantes && acertantes.length > 0) {
-                        const nombres = acertantes.join(' y ');
-                        const verbo = acertantes.length === 1 ? 'acertó' : 'acertaron';
-                        textoAcertantes = ` — 🎯 <strong>${nombres}</strong> ${verbo} el resultado exacto!`;
+                        const nombresOrdenados = [...acertantes].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+                        const nombres = nombresOrdenados.join(', ');
+                        textoAcertantes = ` -- Acertantes exactos: <strong>${nombres}</strong>`;
                     }
                 }
 
@@ -545,7 +545,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
     // Si el torneo terminó, mostrar ganador de la porra en el aviso
     if (avisoEl && pronosticosOficiales['M104']?.ganador && clasificacion.length > 0) {
         const ganador = clasificacion[0];
-        const textoGanador = `🏆 ¡¡CAMPEÓN DE LA PORRA!! 🏆 ${ganador.nombreVisible.toUpperCase()} — ${ganador.puntos} PUNTOS · ${ganador.aciertos} ACIERTOS 🥳🎉`;
+        const textoGanador = `🏆 ¡¡CAMPEÓN/ DE LA PORRA!! 🏆 ${ganador.nombreVisible.toUpperCase()} — ${ganador.puntos} PUNTOS · ${ganador.aciertos} ACIERTOS 🥳🎉`;
         avisoEl.innerHTML = `<span class="aviso-scroll">${textoGanador}</span>`;
     }
 
@@ -1511,7 +1511,7 @@ function renderizarRondaEliminatoria(partidos, ronda) {
             const soloFinal = ronda === 'Final';
             equiposOficialRonda = obtenerEquiposPorRonda(pronOficial, ronda, soloFinal);
             equiposJugadorRonda = obtenerEquiposPorRonda(pronosticosConfirmados, ronda, soloFinal);
-            const mapaPuntosRonda = { R32: 2, R16: 3, R8: 4, R4: 5, Final: 6 };
+            const mapaPuntosRonda = { R32: 2, R16: 3, R8: 5, R4: 7, Final: 12 };
             puntosRonda = mapaPuntosRonda[ronda] || 0;
         }
         
@@ -1525,7 +1525,7 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                         puntosPartido += puntosRonda;
                     }
                 });
-                // Bonus campeón: +9 si acertó el ganador de la Final (M104)
+                // Bonus campeón: +8 si acertó el ganador de la Final (M104)
                 if (ronda === 'Final' && p.llave === 104) {
                     const pronOficial2 = (firebaseDisponible && pronosticosOficialesCache)
                         ? pronosticosOficialesCache
@@ -1533,7 +1533,7 @@ function renderizarRondaEliminatoria(partidos, ronda) {
                     const campeonOficial = pronOficial2['M104']?.ganador;
                     const campeonJugador = pronosticosConfirmados['M104']?.ganador;
                     if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) {
-                        puntosPartido += 9;
+                        puntosPartido += 8;
                     }
                 }
             }
