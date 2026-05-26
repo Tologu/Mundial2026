@@ -486,9 +486,10 @@ async function actualizarClasificacionIndex(useAsync = false) {
         const emojiCorona = posicion === 1 ? '<span class="emoji-corona">👑</span>' : '';
 
         // Calcular flecha de movimiento
+        const todosACero = clasificacion.every(p => p.puntos === 0);
         const posAnterior = rankingAnterior[item.slug];
         let flechaHtml = '';
-        if (posAnterior === undefined || posAnterior === posicion) {
+        if (todosACero || posAnterior === undefined || posAnterior === posicion) {
             flechaHtml = `<span class="flecha-ranking flecha-igual" title="Misma posición">–</span>`;
         } else if (posicion < posAnterior) {
             const diff = posAnterior - posicion;
