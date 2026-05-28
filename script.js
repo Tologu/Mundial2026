@@ -1200,7 +1200,7 @@ function manejarPronostico(event) {
 
     if (boton.classList.contains('btn-confirmar')) {
         if (esPaginaPartidos) {
-            const passConfirmar = prompt('Meta contraseña para confirmar resultado');
+            const passConfirmar = prompt('¿Estás tonto? Esto es solo para el administrador. Meta contraseña para confirmar resultado');
             if (passConfirmar === null) return;
             if (ph(passConfirmar) !== 'e7c503a2') {
                 alert('Contraseña incorrecta. No se ha confirmado el resultado.');
