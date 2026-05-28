@@ -1199,6 +1199,15 @@ function manejarPronostico(event) {
     const grupoEncontrado = gruposData.find(g => g.nombre === grupoNombre);
 
     if (boton.classList.contains('btn-confirmar')) {
+        if (esPaginaPartidos) {
+            const passConfirmar = prompt('Meta contraseña para confirmar resultado');
+            if (passConfirmar === null) return;
+            if (ph(passConfirmar) !== 'e7c503a2') {
+                alert('Contraseña incorrecta. No se ha confirmado el resultado.');
+                return;
+            }
+        }
+
         const golLocal = parseInt(inputLocal.value);
         const golVisitante = parseInt(inputVisitante.value);
 
@@ -1652,6 +1661,15 @@ function manejarPronosticoEliminatoria(event) {
     if (!pronosticosConfirmados[llavePartido]) return; 
 
     if (esConfirmar) {
+        if (esPaginaPartidos) {
+            const passConfirmar = prompt('meta contraseña para confirmar resultado');
+            if (passConfirmar === null) return;
+            if (ph(passConfirmar) !== 'e7c503a2') {
+                alert('Contraseña incorrecta. No se ha confirmado el resultado.');
+                return;
+            }
+        }
+
         const equipoGanador = boton.dataset.equipo;
         
         // 1. Guardar el ganador y el timestamp
