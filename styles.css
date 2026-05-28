@@ -429,6 +429,7 @@ main {
     text-decoration: none;
     color: var(--color-principal);
     font-weight: 700;
+    text-align: center;
     font-size: 0.95em;
     padding: 8px 12px;
     border-radius: 999px;
