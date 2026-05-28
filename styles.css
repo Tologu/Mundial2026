@@ -1340,6 +1340,11 @@ footer {
 /* CARD DE LA FINAL Y 3ER PUESTO */
 /* ---------------------------------------------------- */
 
+.partido-tercero {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
 .partido-final {
     background-color: #fffbea;
     border: 2px solid var(--color-secundario);
@@ -1367,6 +1372,40 @@ footer {
 
 .partido-final:has(.enfrentamiento-clic button:last-child.elegido) {
     box-shadow: 10px 2px 16px rgba(253, 185, 39, 0.6);
+}
+
+/* ---------------------------------------------------- */
+/* CARD DEL CAMPEÓN (SOLO M104) */
+/* ---------------------------------------------------- */
+
+.partido-campeon {
+    background: linear-gradient(135deg, #fffde7 0%, #fff8c5 50%, #fffde7 100%);
+    border: 4px solid #f0a800;
+    box-shadow: 0 6px 22px rgba(253, 185, 39, 0.6), 0 0 0 3px rgba(253, 185, 39, 0.35);
+    outline: 2px solid #ffd84d;
+}
+
+.partido-campeon .llave {
+    font-size: 0.9em;
+    font-weight: 800;
+    color: #8a6200;
+    letter-spacing: 0.05em;
+}
+
+.partido-campeon .btn-equipo-ganador {
+    font-size: 1.05em;
+}
+
+.partido-campeon .btn-equipo-ganador.elegido {
+    box-shadow: 0 0 14px rgba(253, 185, 39, 0.8);
+}
+
+.partido-campeon:has(.enfrentamiento-clic button:first-child.elegido) {
+    box-shadow: -12px 2px 20px rgba(253, 185, 39, 0.7);
+}
+
+.partido-campeon:has(.enfrentamiento-clic button:last-child.elegido) {
+    box-shadow: 12px 2px 20px rgba(253, 185, 39, 0.7);
 }
 
 /* ---------------------------------------------------- */

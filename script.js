@@ -1551,24 +1551,32 @@ function renderizarRondaEliminatoria(partidos, ronda) {
             const TBD_CLASS = (EQUIPO_1_TBD || EQUIPO_2_TBD) ? 'tbd-enfrentamiento' : '';
 
             let LLAVE_TITULO;
+            let LLAVE_LABEL;
             if (ronda === 'Final') {
-                LLAVE_TITULO = (p.llave === 104) ? 'FINAL (M104)' : '3ER PUESTO (M103)';
+                if (p.llave === 104) {
+                    LLAVE_TITULO = 'FINAL (M104)';
+                    LLAVE_LABEL = `Final - FINAL (M104)`;
+                } else {
+                    LLAVE_TITULO = '3ER PUESTO (M103)';
+                    LLAVE_LABEL = '3ER PUESTO (M103)';
+                }
             } else {
                  LLAVE_TITULO = `PARTIDO M${p.llave}`;
+                 LLAVE_LABEL = `${ronda} - PARTIDO M${p.llave}`;
             }
             
             // Clases para destacar el equipo elegido y deshabilitar si ya hay ganador
             const claseEquipo1 = (ganadorElegido === p.equipo1) ? 'elegido' : '';
             const claseEquipo2 = (ganadorElegido === p.equipo2) ? 'elegido' : '';
             const disabledClase = yaHayGanador ? 'deshabilitado' : '';
-            const claseRonda = ronda === 'Final' ? 'partido-final' : '';
+            const claseRonda = ronda === 'Final' ? (p.llave === 104 ? 'partido-final partido-campeon' : 'partido-tercero') : '';
             
             // Condición para deshabilitar los botones de elección
             const disableButtons = (EQUIPO_1_TBD || EQUIPO_2_TBD || yaHayGanador) ? 'disabled' : '';
 
             html += `
                 <div class="partido-bracket ${TBD_CLASS} ${disabledClase} ${claseRonda}">
-                    <span class="llave">${ronda} - ${LLAVE_TITULO}</span>
+                    <span class="llave">${LLAVE_LABEL}</span>
                     <div class="enfrentamiento-clic">
                         <button 
                             class="btn-equipo-ganador ${claseEquipo1}" 
