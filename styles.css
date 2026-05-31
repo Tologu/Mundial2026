@@ -1168,6 +1168,28 @@ footer {
     background: #f6f6f6;
 }
 
+.btn-reiniciar-elim-wrapper {
+    text-align: right;
+    margin-bottom: 12px;
+}
+
+.btn-reiniciar-eliminatorias {
+    padding: 7px 14px;
+    border: 1px solid #c0392b;
+    border-radius: 6px;
+    background: #fff;
+    color: #c0392b;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-reiniciar-eliminatorias:hover {
+    background: #c0392b;
+    color: #fff;
+}
+
 .mejores-terceros-panel {
     margin-top: 10px;
 }

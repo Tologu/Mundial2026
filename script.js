@@ -1669,7 +1669,22 @@ function renderizarRondaEliminatoria(partidos, ronda) {
         html += '</div>';
     }
 
+    // Botón de reinicio de eliminatorias (solo en R32)
+    if (ronda === 'R32' && partidos.length > 0) {
+        html = `<div class="btn-reiniciar-elim-wrapper">
+            <button type="button" class="btn-reiniciar-eliminatorias" id="btn-reiniciar-elim">
+                🔄 Reiniciar eliminatorias
+            </button>
+        </div>` + html;
+    }
+
     contenedor.innerHTML = html;
+
+    // Listener del botón (se añade tras renderizar el DOM)
+    const btnReinElim = contenedor.querySelector('#btn-reiniciar-elim');
+    if (btnReinElim) {
+        btnReinElim.addEventListener('click', reiniciarEliminatorias);
+    }
 }
 
 
@@ -1931,6 +1946,33 @@ document.addEventListener('DOMContentLoaded', () => {
 // ====================================================================
 // 10. FUNCIÓN DE REINICIO TOTAL DE LA APP (Con Contraseña DINÁMICA)
 // ====================================================================
+
+/**
+ * Reinicia solo los partidos de eliminatorias (M73-M104) sin tocar la fase de grupos.
+ */
+function reiniciarEliminatorias() {
+    const pass = prompt('Introduce la contraseña para reiniciar las eliminatorias:');
+    if (pass === null) return;
+
+    const hashEsperado = esPaginaPartidos ? 'e7c503a2' : passwordReiniciar;
+    if (ph(pass) !== hashEsperado) {
+        alert('Contraseña incorrecta. No se han reiniciado las eliminatorias.');
+        return;
+    }
+
+    // Eliminar todos los partidos de eliminatorias (M73-M104)
+    Object.keys(pronosticosConfirmados).forEach(k => {
+        if (/^M\d+$/.test(k)) {
+            delete pronosticosConfirmados[k];
+        }
+    });
+
+    guardarPronosticos();
+
+    // Re-generar y re-renderizar dieciseisavos
+    const partidos = generarDieciseisavos();
+    renderizarRondaEliminatoria(partidos, 'R32');
+}
 
 /**
  * Borra los pronósticos del perfil actual guardados en localStorage y recarga la página.
