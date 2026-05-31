@@ -2435,20 +2435,21 @@ async function reiniciarEliminatorias() {
         }
     });
 
-    // Re-generar R32 (actualiza pronosticosConfirmados con los equipos sin resultados)
-    generarDieciseisavos();
+    // Re-generar R32 (actualiza pronosticosConfirmados sin ganadores)
+    const partidos = generarDieciseisavos();
 
-    // Guardar y esperar confirmación antes de recargar
+    // Guardar de forma awaited para asegurar que Firebase confirma antes de seguir
     try {
         await guardarPronosticosAsync(docIdActual || DOC_ID_OFICIALES, pronosticosConfirmados);
     } catch (e) {
-        console.error(e);
+        console.error('Error guardando en Firebase:', e);
     }
-    // Guardar también en localStorage como respaldo
+    // Siempre actualizar localStorage también como respaldo
     localStorage.setItem(storageKey, JSON.stringify(pronosticosConfirmados));
 
-    // Recargar la página para mostrar el estado limpio
-    window.location.reload();
+    // Re-renderizar la vista sin recargar la página (el estado en memoria ya es correcto)
+    renderizarRondaEliminatoria(partidos, 'R32');
+    alert('Eliminatorias reiniciadas correctamente.');
 }
 
 /**
