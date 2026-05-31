@@ -1315,6 +1315,53 @@ function obtenerClasificados() {
 
 
 /**
+ * Asigna los 8 mejores terceros a los 8 slots de dieciseisavos respetando
+ * las restricciones de grupo (un tercero no puede enfrentar al primero de su
+ * mismo grupo). Usa el algoritmo greedy "más restringido primero".
+ * @param {object[]} tercerosMejores - Array ordenado por calidad con {equipo, grupo}.
+ * @returns {object} Mapa { llave: equipo } para los 8 slots.
+ */
+function asignarTercerosASlots(tercerosMejores) {
+    const slots = [
+        { llave: 74, elegibles: new Set(['A', 'B', 'C', 'D', 'F']) },
+        { llave: 77, elegibles: new Set(['C', 'D', 'F', 'G', 'H']) },
+        { llave: 79, elegibles: new Set(['C', 'E', 'F', 'H', 'I']) },
+        { llave: 80, elegibles: new Set(['E', 'H', 'I', 'J', 'K']) },
+        { llave: 81, elegibles: new Set(['B', 'E', 'F', 'I', 'J']) },
+        { llave: 82, elegibles: new Set(['A', 'E', 'H', 'I', 'J']) },
+        { llave: 85, elegibles: new Set(['E', 'F', 'G', 'I', 'J']) },
+        { llave: 87, elegibles: new Set(['D', 'E', 'I', 'J', 'L']) },
+    ];
+
+    const resultado = {};
+    const disponibles = [...tercerosMejores]; // ordenados por calidad (mejor primero)
+    const pendientes = [...slots];
+
+    while (pendientes.length > 0) {
+        // Contar cuántos terceros disponibles son elegibles para cada slot pendiente
+        pendientes.forEach(slot => {
+            slot._count = disponibles.filter(t => slot.elegibles.has(t.grupo)).length;
+        });
+        // Ordenar por el slot más restringido (menos elegibles disponibles)
+        pendientes.sort((a, b) => a._count - b._count);
+
+        const slot = pendientes.shift();
+
+        // Asignar el mejor tercero disponible que sea elegible para este slot
+        const idx = disponibles.findIndex(t => slot.elegibles.has(t.grupo));
+        if (idx >= 0) {
+            resultado[slot.llave] = disponibles[idx].equipo;
+            disponibles.splice(idx, 1);
+        } else {
+            // Sin tercero elegible disponible (no debería ocurrir con datos válidos)
+            resultado[slot.llave] = disponibles.length > 0 ? disponibles.shift().equipo : null;
+        }
+    }
+
+    return resultado;
+}
+
+/**
  * Genera el bracket de dieciseisavos (M73 a M88) usando los clasificados de grupo.
  * **ACTUALIZADO** con el nuevo calendario de 16avos.
  * @returns {object[]} Lista de 16 partidos de la R32.
@@ -1322,20 +1369,22 @@ function obtenerClasificados() {
 function generarDieciseisavos() {
     const clasificados = obtenerClasificados();
     const p = {}; clasificados.primeros.forEach(c => p[c.grupo] = c.equipo); 
-    const s = {}; clasificados.segundos.forEach(c => s[c.grupo] = c.equipo); 
-    const tercerosPorOrden = clasificados.terceros.map(t => t.equipo); 
+    const s = {}; clasificados.segundos.forEach(c => s[c.grupo] = c.equipo);
 
     // Comprobación simple para ver si la fase de grupos está completada
     if (Object.keys(pronosticosConfirmados).filter(k => k.includes(' vs ')).length < (12 * 6)) {
          return []; 
     }
-    
+
+    // Asignar los 8 mejores terceros a los slots respetando restricciones de grupo
+    const terceroAsignado = asignarTercerosASlots(clasificados.terceros);
+
     const r32Partidos = [
         // Partido 73 – 2º Grupo A v 2º Grupo B 
         { llave: 73, equipo1: s['A'], equipo2: s['B'] }, 
         
-        // Partido 74 – 1º Grupo E v 3º Grupo A/B/C/D/F (Tercero 1)
-        { llave: 74, equipo1: p['E'], equipo2: tercerosPorOrden[0] || 'Tercero 1' },                               
+        // Partido 74 – 1º Grupo E v 3º Grupo A/B/C/D/F
+        { llave: 74, equipo1: p['E'], equipo2: terceroAsignado[74] || 'Tercero 1' },                               
         
         // Partido 75 – 1º Grupo F v 2º Grupo C 
         { llave: 75, equipo1: p['F'], equipo2: s['C'] },                               
@@ -1343,24 +1392,23 @@ function generarDieciseisavos() {
         // Partido 76 – 1º Grupo C v 2º Grupo F 
         { llave: 76, equipo1: p['C'], equipo2: s['F'] }, 
 
-
-        // Partido 77 – 1º Grupo I v 3º Grupo C/D/F/G/H (Tercero 2)
-        { llave: 77, equipo1: p['I'], equipo2: tercerosPorOrden[1] || 'Tercero 2' },                               
+        // Partido 77 – 1º Grupo I v 3º Grupo C/D/F/G/H
+        { llave: 77, equipo1: p['I'], equipo2: terceroAsignado[77] || 'Tercero 2' },                               
         
         // Partido 78 – 2º Grupo E v 2º Grupo I 
         { llave: 78, equipo1: s['E'], equipo2: s['I'] },                               
         
-        // Partido 79 – 1º Grupo A v 3º Grupo C/E/F/H/I (Tercero 3)
-        { llave: 79, equipo1: p['A'], equipo2: tercerosPorOrden[2] || 'Tercero 3' },
+        // Partido 79 – 1º Grupo A v 3º Grupo C/E/F/H/I
+        { llave: 79, equipo1: p['A'], equipo2: terceroAsignado[79] || 'Tercero 3' },
         
-        // Partido 80 – 1º Grupo L v 3º Grupo E/H/I/J/K (Tercero 4)
-        { llave: 80, equipo1: p['L'], equipo2: tercerosPorOrden[3] || 'Tercero 4' },
+        // Partido 80 – 1º Grupo L v 3º Grupo E/H/I/J/K
+        { llave: 80, equipo1: p['L'], equipo2: terceroAsignado[80] || 'Tercero 4' },
         
-        // Partido 81 – 1º Grupo D v 3º Grupo B/E/F/I/J (Tercero 5)
-        { llave: 81, equipo1: p['D'], equipo2: tercerosPorOrden[4] || 'Tercero 5' },                               
+        // Partido 81 – 1º Grupo D v 3º Grupo B/E/F/I/J
+        { llave: 81, equipo1: p['D'], equipo2: terceroAsignado[81] || 'Tercero 5' },                               
         
-        // Partido 82 – 1º Grupo G v 3º Grupo A/E/H/I/J (Tercero 6)
-        { llave: 82, equipo1: p['G'], equipo2: tercerosPorOrden[5] || 'Tercero 6' },
+        // Partido 82 – 1º Grupo G v 3º Grupo A/E/H/I/J
+        { llave: 82, equipo1: p['G'], equipo2: terceroAsignado[82] || 'Tercero 6' },
         
         // Partido 83 – 2º Grupo K v 2º Grupo L 
         { llave: 83, equipo1: s['K'], equipo2: s['L'] },                               
@@ -1368,14 +1416,14 @@ function generarDieciseisavos() {
         // Partido 84 – 1º Grupo H v 2º Grupo J 
         { llave: 84, equipo1: p['H'], equipo2: s['J'] },
         
-        // Partido 85 – 1º Grupo B v 3º Grupo E/F/G/I/J (Tercero 7)
-        { llave: 85, equipo1: p['B'], equipo2: tercerosPorOrden[6] || 'Tercero 7' },
+        // Partido 85 – 1º Grupo B v 3º Grupo E/F/G/I/J
+        { llave: 85, equipo1: p['B'], equipo2: terceroAsignado[85] || 'Tercero 7' },
         
         // Partido 86 – 1º Grupo J v 2º Grupo H 
         { llave: 86, equipo1: p['J'], equipo2: s['H'] },
         
-        // Partido 87 – 1º Grupo K v 3º Grupo D/E/I/J/L (Tercero 8)
-        { llave: 87, equipo1: p['K'], equipo2: tercerosPorOrden[7] || 'Tercero 8' },
+        // Partido 87 – 1º Grupo K v 3º Grupo D/E/I/J/L
+        { llave: 87, equipo1: p['K'], equipo2: terceroAsignado[87] || 'Tercero 8' },
         
         // Partido 88 – 2º Grupo D v 2º Grupo G 
         { llave: 88, equipo1: s['D'], equipo2: s['G'] },   
