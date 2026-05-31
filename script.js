@@ -2418,7 +2418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Reinicia solo los partidos de eliminatorias (M73-M104) sin tocar la fase de grupos.
  */
-function reiniciarEliminatorias() {
+async function reiniciarEliminatorias() {
     const pass = prompt('Introduce la contraseña para reiniciar las eliminatorias:');
     if (pass === null) return;
 
@@ -2435,11 +2435,20 @@ function reiniciarEliminatorias() {
         }
     });
 
-    guardarPronosticos();
+    // Re-generar R32 (actualiza pronosticosConfirmados con los equipos sin resultados)
+    generarDieciseisavos();
 
-    // Re-generar y re-renderizar dieciseisavos
-    const partidos = generarDieciseisavos();
-    renderizarRondaEliminatoria(partidos, 'R32');
+    // Guardar y esperar confirmación antes de recargar
+    try {
+        await guardarPronosticosAsync(docIdActual || DOC_ID_OFICIALES, pronosticosConfirmados);
+    } catch (e) {
+        console.error(e);
+    }
+    // Guardar también en localStorage como respaldo
+    localStorage.setItem(storageKey, JSON.stringify(pronosticosConfirmados));
+
+    // Recargar la página para mostrar el estado limpio
+    window.location.reload();
 }
 
 /**
