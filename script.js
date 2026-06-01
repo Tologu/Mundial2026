@@ -363,6 +363,119 @@ async function obtenerAcertantesExactosAsync(nombrePartido) {
     return obtenerAcertantesExactos(nombrePartido, true);
 }
 
+// ====================================================================
+// PRÓXIMO PARTIDO – helpers para la columna de índex
+// ====================================================================
+
+function obtenerListaPartidosGrupos() {
+    // Orden cronológico real del Mundial 2026 (fase de grupos)
+    return [
+        // Jornada 1
+        'México vs Sudáfrica',              // 11 Jun
+        'Corea del Sur vs Rep. Checa',      // 12 Jun
+        'Canadá vs Bosnia',                 // 12 Jun
+        'Estados Unidos vs Paraguay',        // 13 Jun
+        'Catar vs Suiza',                   // 13 Jun
+        'Brasil vs Marruecos',              // 14 Jun
+        'Haití vs Escocia',                 // 14 Jun
+        'Australia vs Turquía',             // 14 Jun
+        'Alemania vs Curazao',              // 14 Jun
+        'Países Bajos vs Japón',            // 14 Jun
+        'Costa de Marfil vs Ecuador',       // 15 Jun
+        'Suecia vs Túnez',                  // 15 Jun
+        'España vs Cabo Verde',             // 15 Jun
+        'Bélgica vs Egipto',               // 15 Jun
+        'Arabia Saudita vs Uruguay',        // 16 Jun
+        'Irán vs Nueva Zelanda',            // 16 Jun
+        'Francia vs Senegal',               // 16 Jun
+        'Irak vs Noruega',                  // 17 Jun
+        'Argentina vs Argelia',             // 17 Jun
+        'Austria vs Jordania',              // 17 Jun
+        'Portugal vs RD Congo',             // 17 Jun
+        'Inglaterra vs Croacia',            // 17 Jun
+        'Ghana vs Panamá',                  // 18 Jun
+        'Uzbekistán vs Colombia',           // 18 Jun
+        // Jornada 2
+        'Rep. Checa vs Sudáfrica',          // 18 Jun
+        'Suiza vs Bosnia',                  // 18 Jun
+        'Canadá vs Catar',                  // 19 Jun
+        'México vs Corea del Sur',          // 19 Jun
+        'Estados Unidos vs Australia',      // 19 Jun
+        'Escocia vs Marruecos',             // 20 Jun
+        'Brasil vs Haití',                  // 20 Jun
+        'Turquía vs Paraguay',              // 20 Jun
+        'Países Bajos vs Suecia',           // 20 Jun
+        'Alemania vs Costa de Marfil',      // 20 Jun
+        'Ecuador vs Curazao',              // 21 Jun
+        'Túnez vs Japón',                   // 21 Jun
+        'España vs Arabia Saudita',         // 21 Jun
+        'Bélgica vs Irán',                  // 21 Jun
+        'Uruguay vs Cabo Verde',            // 22 Jun
+        'Nueva Zelanda vs Egipto',          // 22 Jun
+        'Argentina vs Austria',             // 22 Jun
+        'Francia vs Irak',                  // 22 Jun
+        'Noruega vs Senegal',               // 23 Jun
+        'Jordania vs Argelia',              // 23 Jun
+        'Portugal vs Uzbekistán',           // 23 Jun
+        'Inglaterra vs Ghana',              // 23 Jun
+        'Panamá vs Croacia',                // 24 Jun
+        'Colombia vs RD Congo',             // 24 Jun
+        // Jornada 3
+        'Escocia vs Brasil',                // 24 Jun
+        'Marruecos vs Haití',              // 24 Jun
+        'Suiza vs Canadá',                  // 25 Jun
+        'Bosnia vs Catar',                  // 25 Jun
+        'Sudáfrica vs Corea del Sur',       // 25 Jun
+        'Rep. Checa vs México',             // 25 Jun
+        'Paraguay vs Australia',            // 26 Jun
+        'Turquía vs Estados Unidos',        // 26 Jun
+        'Túnez vs Países Bajos',            // 26 Jun
+        'Japón vs Suecia',                  // 26 Jun
+        'Ecuador vs Alemania',              // 26 Jun
+        'Curazao vs Costa de Marfil',       // 26 Jun
+        'Egipto vs Irán',                   // 27 Jun
+        'Nueva Zelanda vs Bélgica',         // 27 Jun
+        'Uruguay vs España',                // 27 Jun
+        'Cabo Verde vs Arabia Saudita',     // 27 Jun
+        'Senegal vs Irak',                  // 27 Jun
+        'Noruega vs Francia',               // 27 Jun
+        'Argelia vs Austria',               // 27 Jun
+        'Jordania vs Argentina',            // 27 Jun
+        'Croacia vs Ghana',                 // 27 Jun
+        'Panamá vs Inglaterra',             // 27 Jun
+        'RD Congo vs Uzbekistán',           // 27 Jun
+        'Colombia vs Portugal',             // 27 Jun
+    ];
+}
+
+function obtenerProximoPartidoClave(pronosticosOficiales) {
+    for (const clave of obtenerListaPartidosGrupos()) {
+        const dato = pronosticosOficiales[clave];
+        if (!dato || typeof dato.local !== 'number') return clave;
+    }
+    for (let i = 73; i <= 104; i++) {
+        const clave = `M${i}`;
+        const dato = pronosticosOficiales[clave];
+        if (!dato || !dato.ganador) return clave;
+    }
+    return null;
+}
+
+function obtenerTextoPronosticoProximo(pronosticoJugador, clave) {
+    if (!pronosticoJugador) return '—';
+    if (clave && clave.includes(' vs ')) {
+        if (typeof pronosticoJugador.local === 'number' && typeof pronosticoJugador.visitante === 'number') {
+            return `${pronosticoJugador.local}-${pronosticoJugador.visitante}`;
+        }
+        return '—';
+    } else {
+        if (pronosticoJugador.equipoLocal && pronosticoJugador.equipoVisitante) {
+            return `${pronosticoJugador.equipoLocal} vs ${pronosticoJugador.equipoVisitante}`;
+        }
+        return '—';
+    }
+}
+
 async function actualizarClasificacionIndex(useAsync = false) {
     const tabla = document.getElementById('tabla-clasificacion');
     if (!tabla) return;
@@ -370,6 +483,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const pronosticosOficiales = useAsync
         ? await cargarPronosticosOficialesAsync()
         : cargarPronosticosPorClave(perfilesConfig.partidos.key);
+
+    const claveProximo = obtenerProximoPartidoClave(pronosticosOficiales);
 
     // --- Aviso de último resultado confirmado ---
     const avisoEl = document.getElementById('ultimo-resultado-aviso');
@@ -430,7 +545,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 const docId = DOC_ID_PARTICIPANTES[slug];
                 const pronosticosJugador = docId ? await cargarPronosticosPorDocId(docId) : {};
                 const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
-                return { nombreVisible, slug, puntos, aciertos };
+                const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
+                return { nombreVisible, slug, puntos, aciertos, pronosticoProximo };
             })
         );
     } else {
@@ -438,7 +554,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
             const config = perfilesConfig[slug];
             const pronosticosJugador = config ? cargarPronosticosPorClave(config.key) : {};
             const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
-            return { nombreVisible, slug, puntos, aciertos };
+            const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
+            return { nombreVisible, slug, puntos, aciertos, pronosticoProximo };
         });
     }
 
@@ -478,6 +595,16 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const currentRanking = {};
     clasificacion.forEach((item, idx) => { currentRanking[item.slug] = idx + 1; });
 
+    // Actualizar cabecera de la columna Próximo partido
+    const thProximo = tabla.querySelector('#th-proximo-partido');
+    if (thProximo) {
+        if (claveProximo) {
+            thProximo.innerHTML = `Próximo partido<br><span class="proximo-match-sub">${claveProximo}</span>`;
+        } else {
+            thProximo.textContent = 'Torneo finalizado';
+        }
+    }
+
     tbody.innerHTML = '';
     clasificacion.forEach((item, index) => {
         const posicion = index + 1;
@@ -506,6 +633,11 @@ async function actualizarClasificacionIndex(useAsync = false) {
         }
 
         // Último puesto
+        const textoProximo = obtenerTextoPronosticoProximo(item.pronosticoProximo, claveProximo);
+        const tdProximo = claveProximo
+            ? `<td class="td-proximo${textoProximo === '—' ? ' td-proximo-vacio' : ''}">${textoProximo}</td>`
+            : '';
+
         if (index === clasificacion.length - 1) {
             fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
@@ -513,6 +645,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
                 <td>${item.puntos} <span class="emoji-poop">💩</span></td>
                 <td>${item.aciertos}</td>
+                ${tdProximo}
             `;
         } else {
             fila.innerHTML = `
@@ -524,6 +657,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                     ${posicion === 2 ? ' <span class="premio-segundo">+4€</span>' : ''}
                     ${posicion === 3 ? ' <span class="premio-tercero">+2€</span>' : ''}
                 </td>
+                ${tdProximo}
             `;
         }
         tbody.appendChild(fila);
