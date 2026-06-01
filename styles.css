@@ -19,32 +19,13 @@
     margin: 0 2px;
 }
 
-.premio-primero {
-    float: right;
-    color: #1b5e20;
-    background-color: #c8e6c9;
-    font-weight: 700;
-    font-size: 0.85em;
-    padding: 1px 7px;
-    border-radius: 20px;
-    border: 1px solid #388e3c;
-    letter-spacing: 0.03em;
-}
-
-.premio-segundo {
-    float: right;
-    color: #1b5e20;
-    background-color: #c8e6c9;
-    font-weight: 700;
-    font-size: 0.85em;
-    padding: 1px 7px;
-    border-radius: 20px;
-    border: 1px solid #388e3c;
-    letter-spacing: 0.03em;
-}
-
+.premio-primero,
+.premio-segundo,
 .premio-tercero {
-    float: right;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     color: #1b5e20;
     background-color: #c8e6c9;
     font-weight: 700;
@@ -53,6 +34,7 @@
     border-radius: 20px;
     border: 1px solid #388e3c;
     letter-spacing: 0.03em;
+    pointer-events: none;
 }
 
 #tabla-clasificacion tbody tr:first-child td:last-child {
@@ -471,8 +453,9 @@ h2 {
 
 #tabla-clasificacion th, #tabla-clasificacion td {
     padding: 18px 20px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #e0e0e0;
+    position: relative;
 }
 
 #tabla-clasificacion thead {
