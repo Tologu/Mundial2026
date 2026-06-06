@@ -492,11 +492,7 @@ function obtenerProximoPartidoClave(pronosticosOficiales) {
         const dato = pronosticosOficiales[clave];
         if (!dato || typeof dato.local !== 'number') return clave;
     }
-    for (let i = 73; i <= 104; i++) {
-        const clave = `M${i}`;
-        const dato = pronosticosOficiales[clave];
-        if (!dato || !dato.ganador) return clave;
-    }
+    // Fase eliminatoria: no mostrar próximo partido
     return null;
 }
 
@@ -635,8 +631,9 @@ async function actualizarClasificacionIndex(useAsync = false) {
     if (thProximo) {
         if (claveProximo) {
             thProximo.innerHTML = `Próximo partido<br><span class="proximo-match-sub">${claveProximo}</span>`;
+            thProximo.style.display = '';
         } else {
-            thProximo.textContent = 'Torneo finalizado';
+            thProximo.style.display = 'none';
         }
     }
 
