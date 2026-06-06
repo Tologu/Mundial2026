@@ -467,20 +467,29 @@ h2 {
 #tabla-clasificacion {
     width: auto;
     min-width: 400px;
-    max-width: 1100px;
+    max-width: 900px;
     margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
     box-shadow: 0 2px 15px rgba(20, 62, 104, 0.15);
     border-radius: 10px;
     overflow: hidden;
+    font-size: 0.9em;
 }
 
 #tabla-clasificacion th, #tabla-clasificacion td {
-    padding: 18px 20px;
+    padding: 12px 14px;
     text-align: center;
     border-bottom: 1px solid #e0e0e0;
     position: relative;
+    white-space: nowrap;
+}
+
+/* Columna posición: ancho fijo para que el badge no la expanda */
+#tabla-clasificacion th:first-child,
+#tabla-clasificacion td:first-child {
+    width: 120px;
+    min-width: 120px;
 }
 
 #tabla-clasificacion thead {
@@ -1044,43 +1053,24 @@ footer {
 }
 
 /* Layout lateral premios en index */
-.clasificacion-layout {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0;
-  position: relative;
-}
-
-.premios-laterales {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 72px;
-  flex-shrink: 0;
-}
-
-.premio-lateral-item {
-  display: flex;
+.premio-badge {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
-  width: 72px;
+  padding: 1px 7px;
   font-weight: 700;
-  font-size: 0.85em;
+  font-size: 0.78em;
   color: #1b5e20;
   background-color: #c8e6c9;
   border-radius: 20px;
   border: 2px solid #388e3c;
   letter-spacing: 0.03em;
   white-space: nowrap;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
-#tabla-clasificacion {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9em; /* más compacto en móvil */
-}
+/* (regla fusionada arriba) */
 .group-tabs {
     margin-bottom: 20px;
 }

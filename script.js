@@ -641,10 +641,13 @@ async function actualizarClasificacionIndex(useAsync = false) {
             ? `<td class="td-proximo${textoProximo === '—' ? ' td-proximo-vacio' : ''}">${textoProximo}</td>`
             : '';
 
+        const premios = ['', '+24€', '+4€', '+2€'];
+        const premioBadge = posicion <= 3 ? `<span class="premio-badge">${premios[posicion]}</span> ` : '';
+
         if (index === clasificacion.length - 1) {
             fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
-                <td>${posicion}${flechaHtml} <span class="emoji-clown">🤡</span></td>
+                <td>${premioBadge}${posicion}${flechaHtml} <span class="emoji-clown">🤡</span></td>
                 <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
                 <td>${item.puntos} <span class="emoji-poop">💩</span></td>
                 <td>${item.aciertos}</td>
@@ -652,7 +655,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
             `;
         } else {
             fila.innerHTML = `
-                <td>${posicion}${flechaHtml}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
+                <td>${premioBadge}${posicion}${flechaHtml}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
                 <td>${item.aciertos}</td>
@@ -687,25 +690,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
     // Revelar la tabla con fade-in (evita el flash de contenido estático)
     tabla.classList.add('tabla-lista');
 
-    // Alinear badges de premios laterales con las filas 1ª, 2ª, 3ª
-    requestAnimationFrame(() => {
-        const layout = document.querySelector('.clasificacion-layout');
-        const badges = document.querySelectorAll('.premio-lateral-item');
-        const tablaEl = document.getElementById('tabla-clasificacion');
-        if (!layout || badges.length < 3 || !tablaEl) return;
-        const layoutRect = layout.getBoundingClientRect();
-        const tablaRect = tablaEl.getBoundingClientRect();
-        const leftPos = tablaRect.left - layoutRect.left - badges[0].offsetWidth - 8;
-        [0, 1, 2].forEach(i => {
-            const fila = tbody.rows[i];
-            if (!fila || !badges[i]) return;
-            const rect = fila.getBoundingClientRect();
-            const center = rect.top - layoutRect.top + rect.height / 2;
-            badges[i].style.position = 'absolute';
-            badges[i].style.left = leftPos + 'px';
-            badges[i].style.top = (center - badges[i].offsetHeight / 2 - 2) + 'px';
-        });
-    });
+
 }
 
 // Alias para compatibilidad hacia atrás
