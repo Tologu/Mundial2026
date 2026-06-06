@@ -1052,6 +1052,45 @@ footer {
   overflow-x: auto;
 }
 
+/* Optimización móvil para la tabla de clasificación */
+@media (max-width: 600px) {
+  #tabla-clasificacion {
+    font-size: 1em;
+    min-width: unset;
+    width: 100%;
+  }
+
+  #tabla-clasificacion th,
+  #tabla-clasificacion td {
+    padding: 14px 8px;
+  }
+
+  /* Columna posición: más ajustada */
+  #tabla-clasificacion th:first-child,
+  #tabla-clasificacion td:first-child {
+    width: auto;
+    min-width: unset;
+  }
+
+  .premio-badge {
+    font-size: 0.72em;
+    padding: 1px 5px;
+    margin-right: 2px;
+  }
+
+  /* Ocultar columna "Próximo partido" en móvil para ganar espacio */
+  #th-proximo-partido,
+  .td-proximo,
+  .td-proximo-vacio {
+    display: none;
+  }
+
+  #tabla-clasificacion thead {
+    font-size: 0.85em;
+    letter-spacing: 0;
+  }
+}
+
 /* Layout lateral premios en index */
 .premio-badge {
   display: inline-flex;
