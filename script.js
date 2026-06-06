@@ -86,7 +86,7 @@ const perfilesConfig = {
     adri: { key: 'pronosticosMundial_Adri', password: '9add415d' },
     fuen: { key: 'pronosticosMundial_Fuen', password: 'ddd34d1b' },
     isa: { key: 'pronosticosMundial_Isa', password: 'a2b56118' },
-    isabelc: { key: 'pronosticosMundial_IsabelC', password: '156946b0' },
+    isabelc: { key: 'pronosticosMundial_IsabelC', password: 'fe7ee5d0' },
     jose: { key: 'pronosticosMundial_Jose', password: '1e4188d0' },
     maria: { key: 'pronosticosMundial_Maria', password: '7aa6775' },
     moi: { key: 'pronosticosMundial_Moi', password: '40c70d88' },
