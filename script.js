@@ -257,6 +257,42 @@ function obtenerEquiposPorRonda(pronosticos, ronda, soloFinal = false) {
     return set;
 }
 
+// Devuelve la última ronda eliminatoria con equipos definidos en el cuadro oficial
+function detectarUltimaRondaElimActiva(pronosticosOficiales) {
+    const rondas = ['R32', 'R16', 'R8', 'R4', 'Final'];
+    let ultima = null;
+    for (const ronda of rondas) {
+        if (obtenerEquiposPorRonda(pronosticosOficiales, ronda).size > 0) ultima = ronda;
+    }
+    return ultima;
+}
+
+// Calcula los puntos obtenidos por un jugador en una ronda eliminatoria concreta
+function calcularPuntosPorRondaEspecifica(pronosticosOficiales, pronosticosPerfil, ronda) {
+    const puntosRonda = { R32: 2, R16: 3, R8: 5, R4: 7, Final: 12 };
+    const pts = puntosRonda[ronda] || 0;
+    const soloFinal = ronda === 'Final';
+    const oficiales = obtenerEquiposPorRonda(pronosticosOficiales, ronda, soloFinal);
+    const jugador = obtenerEquiposPorRonda(pronosticosPerfil, ronda, soloFinal);
+    let puntos = 0;
+    oficiales.forEach(equipo => { if (jugador.has(equipo)) puntos += pts; });
+    if (ronda === 'Final') {
+        const campeonOficial = pronosticosOficiales['M104']?.ganador;
+        const campeonJugador = pronosticosPerfil['M104']?.ganador;
+        if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) puntos += 8;
+    }
+    return puntos;
+}
+
+// Calcula los puntos por ronda para todas las fases eliminatorias
+function calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosPerfil) {
+    const resultado = {};
+    for (const ronda of ['R32', 'R16', 'R8', 'R4', 'Final']) {
+        resultado[ronda] = calcularPuntosPorRondaEspecifica(pronosticosOficiales, pronosticosPerfil, ronda);
+    }
+    return resultado;
+}
+
 function calcularPuntajePerfil(pronosticosOficiales, pronosticosPerfil) {
     let puntos = 0;
     let aciertos = 0;
@@ -504,19 +540,13 @@ async function actualizarClasificacionIndex(useAsync = false) {
                     ultimoDato = dato;
                 }
             });
-            if (ultimoClave && ultimoDato) {
-                let textoPartido = '';
-                if (ultimoClave.includes(' vs ')) {
-                    const [loc, vis] = ultimoClave.split(' vs ');
-                    textoPartido = `${loc} <strong>${ultimoDato.local}–${ultimoDato.visitante}</strong> ${vis}`;
-                } else {
-                    textoPartido = `${ultimoClave}: <strong>${ultimoDato.ganador || '?'}</strong>`;
-                }
+            if (ultimoClave && ultimoDato && ultimoClave.includes(' vs ')) {
+                const [loc, vis] = ultimoClave.split(' vs ');
+                const textoPartido = `${loc} <strong>${ultimoDato.local}–${ultimoDato.visitante}</strong> ${vis}`;
 
                 // Buscar acertantes exactos del último partido (solo fase de grupos)
                 let textoAcertantes = '';
-                if (ultimoClave.includes(' vs ') &&
-                    typeof ultimoDato.local === 'number' &&
+                if (typeof ultimoDato.local === 'number' &&
                     typeof ultimoDato.visitante === 'number') {
                     const acertantes = await (firebaseDisponible
                         ? obtenerAcertantesExactosAsync(ultimoClave)
@@ -549,7 +579,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 const pronosticosJugador = docId ? await cargarPronosticosPorDocId(docId) : {};
                 const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
                 const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
-                return { nombreVisible, slug, puntos, aciertos, pronosticoProximo };
+                const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
+                return { nombreVisible, slug, puntos, aciertos, pronosticoProximo, puntosPorRonda };
             })
         );
     } else {
@@ -558,7 +589,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
             const pronosticosJugador = config ? cargarPronosticosPorClave(config.key) : {};
             const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
             const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
-            return { nombreVisible, slug, puntos, aciertos, pronosticoProximo };
+            const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
+            return { nombreVisible, slug, puntos, aciertos, pronosticoProximo, puntosPorRonda };
         });
     }
 
@@ -685,6 +717,18 @@ async function actualizarClasificacionIndex(useAsync = false) {
         const ganador = clasificacion[0];
         const textoGanador = `🏆 ¡¡CAMPEÓN/ DE LA PORRA!! 🏆 ${ganador.nombreVisible.toUpperCase()} — ${ganador.puntos} PUNTOS · ${ganador.aciertos} ACIERTOS 🥳🎉`;
         avisoEl.innerHTML = `<span class="aviso-scroll">${textoGanador}</span>`;
+    } else if (avisoEl && clasificacion.length > 0) {
+        // Si estamos en fase eliminatoria, mostrar ranking de puntos de la ronda activa
+        const rondaActiva = detectarUltimaRondaElimActiva(pronosticosOficiales);
+        if (rondaActiva) {
+            const nombresRonda = { R32: 'Dieciseisavos', R16: 'Octavos de Final', R8: 'Cuartos de Final', R4: 'Semifinales', Final: 'Final' };
+            const rankingRonda = [...clasificacion]
+                .sort((a, b) => (b.puntosPorRonda?.[rondaActiva] || 0) - (a.puntosPorRonda?.[rondaActiva] || 0));
+            const textoRanking = rankingRonda
+                .map((j, i) => `${i + 1}. ${j.nombreVisible} (${j.puntosPorRonda?.[rondaActiva] || 0}pts)`)
+                .join(' · ');
+            avisoEl.innerHTML = `<span class="aviso-scroll">📊 Puntos ${nombresRonda[rondaActiva]}: ${textoRanking}</span>`;
+        }
     }
 
     // Revelar la tabla con fade-in (evita el flash de contenido estático)
