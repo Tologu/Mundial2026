@@ -691,14 +691,18 @@ async function actualizarClasificacionIndex(useAsync = false) {
     requestAnimationFrame(() => {
         const layout = document.querySelector('.clasificacion-layout');
         const badges = document.querySelectorAll('.premio-lateral-item');
-        if (!layout || badges.length < 3) return;
-        const layoutTop = layout.getBoundingClientRect().top;
+        const tablaEl = document.getElementById('tabla-clasificacion');
+        if (!layout || badges.length < 3 || !tablaEl) return;
+        const layoutRect = layout.getBoundingClientRect();
+        const tablaRect = tablaEl.getBoundingClientRect();
+        const leftPos = tablaRect.left - layoutRect.left - badges[0].offsetWidth - 8;
         [0, 1, 2].forEach(i => {
             const fila = tbody.rows[i];
             if (!fila || !badges[i]) return;
             const rect = fila.getBoundingClientRect();
-            const center = rect.top - layoutTop + rect.height / 2;
+            const center = rect.top - layoutRect.top + rect.height / 2;
             badges[i].style.position = 'absolute';
+            badges[i].style.left = leftPos + 'px';
             badges[i].style.top = (center - badges[i].offsetHeight / 2 - 2) + 'px';
         });
     });

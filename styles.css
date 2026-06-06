@@ -52,7 +52,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    max-width: 960px;
+    max-width: 1100px;
     margin: 0 auto 14px auto;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--color-secundario);
@@ -467,7 +467,7 @@ h2 {
 #tabla-clasificacion {
     width: auto;
     min-width: 400px;
-    max-width: 960px;
+    max-width: 1100px;
     margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
@@ -1048,15 +1048,16 @@ footer {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 16px;
+  gap: 0;
   position: relative;
 }
 
 .premios-laterales {
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 72px;
   flex-shrink: 0;
-  align-self: stretch;
 }
 
 .premio-lateral-item {
@@ -1734,9 +1735,14 @@ body.perfil-page .tab-button {
     margin-top: 0;
 }
 
-.reglas-contenido ul {
+.reglas-contenido ul,
+.reglas-contenido ol {
     margin-left: 20px;
     list-style-type: disc;
+}
+
+.reglas-contenido ol {
+    list-style-type: decimal;
 }
 
 .reglas-contenido li {
