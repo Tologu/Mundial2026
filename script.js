@@ -86,6 +86,7 @@ const perfilesConfig = {
     adri: { key: 'pronosticosMundial_Adri', password: '9add415d' },
     fuen: { key: 'pronosticosMundial_Fuen', password: 'ddd34d1b' },
     isa: { key: 'pronosticosMundial_Isa', password: 'a2b56118' },
+    isabelc: { key: 'pronosticosMundial_IsabelC', password: '156946b0' },
     jose: { key: 'pronosticosMundial_Jose', password: '1e4188d0' },
     maria: { key: 'pronosticosMundial_Maria', password: '7aa6775' },
     moi: { key: 'pronosticosMundial_Moi', password: '40c70d88' },
@@ -107,6 +108,7 @@ const PARTICIPANTES = {
     'Adri': 'adri',
     'Fuen': 'fuen',
     'Isa': 'isa',
+    'Isabel C.': 'isabelc',
     'Jose': 'jose',
     'María': 'maria',
     'Moi': 'moi',
@@ -124,6 +126,7 @@ const DOC_ID_PARTICIPANTES = {
     adri: 'adri',
     fuen: 'fuen',
     isa: 'isa',
+    isabelc: 'isabelc',
     jose: 'jose',
     maria: 'maria',
     moi: 'moi',
@@ -652,11 +655,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td>${posicion}${flechaHtml}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
-                <td>${item.aciertos}
-                    ${posicion === 1 ? ' <span class="premio-primero">+22€</span>' : ''}
-                    ${posicion === 2 ? ' <span class="premio-segundo">+4€</span>' : ''}
-                    ${posicion === 3 ? ' <span class="premio-tercero">+2€</span>' : ''}
-                </td>
+                <td>${item.aciertos}</td>
                 ${tdProximo}
             `;
         }
@@ -687,6 +686,22 @@ async function actualizarClasificacionIndex(useAsync = false) {
 
     // Revelar la tabla con fade-in (evita el flash de contenido estático)
     tabla.classList.add('tabla-lista');
+
+    // Alinear badges de premios laterales con las filas 1ª, 2ª, 3ª
+    requestAnimationFrame(() => {
+        const layout = document.querySelector('.clasificacion-layout');
+        const badges = document.querySelectorAll('.premio-lateral-item');
+        if (!layout || badges.length < 3) return;
+        const layoutTop = layout.getBoundingClientRect().top;
+        [0, 1, 2].forEach(i => {
+            const fila = tbody.rows[i];
+            if (!fila || !badges[i]) return;
+            const rect = fila.getBoundingClientRect();
+            const center = rect.top - layoutTop + rect.height / 2;
+            badges[i].style.position = 'absolute';
+            badges[i].style.top = (center - badges[i].offsetHeight / 2 - 2) + 'px';
+        });
+    });
 }
 
 // Alias para compatibilidad hacia atrás
@@ -2403,6 +2418,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnReglas = document.querySelector('.btn-reglas-header');
         const modalReglas = document.getElementById('modal-reglas');
         const closeModal = document.querySelector('.close-modal');
+
+        const btnInstrucciones = document.querySelector('.btn-instrucciones-header');
+        const modalInstrucciones = document.getElementById('modal-instrucciones');
+        const closeModalInstrucciones = document.querySelector('.close-modal-instrucciones');
+
+        if (btnInstrucciones && modalInstrucciones) {
+            const toggleInstrucciones = (show) => {
+                if (show) {
+                    modalInstrucciones.classList.remove('modal-hidden');
+                } else {
+                    modalInstrucciones.classList.add('modal-hidden');
+                }
+            };
+            btnInstrucciones.addEventListener('click', () => toggleInstrucciones(true));
+            if (closeModalInstrucciones) {
+                closeModalInstrucciones.addEventListener('click', () => toggleInstrucciones(false));
+            }
+            modalInstrucciones.addEventListener('click', (event) => {
+                if (event.target === modalInstrucciones) toggleInstrucciones(false);
+            });
+        }
         
         if (btnReglas && modalReglas) {
             const toggleModal = (show) => {

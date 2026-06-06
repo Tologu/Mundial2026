@@ -12,31 +12,56 @@
             <a href="index.html" class="active">Clasificación</a>
             <a href="partidos.html">RESULTADOS OFICIALES</a>
         </nav>
+        <button type="button" class="btn-instrucciones-header">📋 Instrucciones</button>
         <button type="button" class="btn-reglas-header">Reglas</button>
     </header>
 
     <main class="clasificacion-page">
-        <div class="header-clasificacion">
-            <h2>Tabla de Posiciones</h2>
-            <div id="ultimo-resultado-aviso"></div>
+        <div class="clasificacion-layout">
+            <div class="premios-laterales">
+                <div class="premio-lateral-item">+24€</div>
+                <div class="premio-lateral-item">+4€</div>
+                <div class="premio-lateral-item">+2€</div>
+            </div>
+            <div>
+                <div class="header-clasificacion">
+                    <h2>Tabla de Posiciones</h2>
+                    <div id="ultimo-resultado-aviso"></div>
+                </div>
+                <table id="tabla-clasificacion">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Participante</th>
+                            <th>Puntos</th>
+                            <th>Aciertos</th>
+                            <th id="th-proximo-partido">Próximo partido</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
-        <table id="tabla-clasificacion">
-            <thead>
-                <tr>
-                    <th>Posición</th>
-                    <th>Participante</th>
-                    <th>Puntos</th>
-                    <th>Aciertos</th>
-                    <th id="th-proximo-partido">Próximo partido</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
     </main>
 
     <footer>
         <p>&copy; Mundial 2026</p>
     </footer>
+
+    <!-- Modal de Instrucciones -->
+    <div id="modal-instrucciones" class="modal modal-hidden">
+        <div class="modal-content">
+            <span class="close-modal-instrucciones">&times;</span>
+            <h2>INSTRUCCIONES PARA RELLENAR</h2>
+            <div class="reglas-contenido">
+                <ol>
+                    <li>Entra en tu perfil.</li>
+                    <li>Rellena los resultados de los Grupos A a la L.</li>
+                    <li>Una vez rellenado, pulsa en la pestaña "Dieciseisavos". A partir de ahí, selecciona los equipos que avanzan a la siguiente fase hasta la final.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal de Reglas -->
     <div id="modal-reglas" class="modal modal-hidden">

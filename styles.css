@@ -52,7 +52,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    max-width: 820px;
+    max-width: 960px;
     margin: 0 auto 14px auto;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--color-secundario);
@@ -361,6 +361,31 @@ nav a.active {
     font-weight: bold;
 }
 
+.btn-instrucciones-header {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    background: #ffffff;
+    color: var(--color-principal);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9em;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    z-index: 10;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-instrucciones-header:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
 .btn-reglas-header {
     position: absolute;
     right: 15px;
@@ -396,7 +421,7 @@ main {
 
 .perfiles-menu {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     padding: 12px;
     margin: 0 0 18px 0;
@@ -442,7 +467,7 @@ h2 {
 #tabla-clasificacion {
     width: auto;
     min-width: 400px;
-    max-width: 820px;
+    max-width: 960px;
     margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
@@ -1016,6 +1041,38 @@ footer {
 }
 .clasificacion-page {
   overflow-x: auto;
+}
+
+/* Layout lateral premios en index */
+.clasificacion-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+}
+
+.premios-laterales {
+  position: relative;
+  width: 72px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.premio-lateral-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 72px;
+  font-weight: 700;
+  font-size: 0.85em;
+  color: #1b5e20;
+  background-color: #c8e6c9;
+  border-radius: 20px;
+  border: 2px solid #388e3c;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 #tabla-clasificacion {
