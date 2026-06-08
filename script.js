@@ -90,8 +90,6 @@ const perfilesConfig = {
     jose: { key: 'pronosticosMundial_Jose', password: '1e4188d0' },
     maria: { key: 'pronosticosMundial_Maria', password: '7aa6775' },
     moi: { key: 'pronosticosMundial_Moi', password: '40c70d88' },
-    alba: { key: 'pronosticosMundial_Alba', password: 'dcdce14d' },
-    enrique: { key: 'pronosticosMundial_Enrique', password: '48c76af2' },
     // Añade más perfiles aquí si es necesario
 };
 
@@ -111,9 +109,7 @@ const PARTICIPANTES = {
     'Isabel C.': 'isabelc',
     'Jose': 'jose',
     'María': 'maria',
-    'Moi': 'moi',
-    'Alba': 'alba',
-    'Enrique': 'enrique'
+    'Moi': 'moi'
 };
 
 const DOC_ID_PARTICIPANTES = {
@@ -129,9 +125,7 @@ const DOC_ID_PARTICIPANTES = {
     isabelc: 'isabelc',
     jose: 'jose',
     maria: 'maria',
-    moi: 'moi',
-    alba: 'alba',
-    enrique: 'enrique'
+    moi: 'moi'
 };
 
 function obtenerStorageKeyParaDocId(docId) {
@@ -670,7 +664,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
             ? `<td class="td-proximo${textoProximo === '—' ? ' td-proximo-vacio' : ''}">${textoProximo}</td>`
             : '';
 
-        const premios = ['', '+24€', '+4€', '+2€'];
+        const premios = ['', '+20€', '+4€', '+2€'];
         const premioBadge = posicion <= 3 ? `<span class="premio-badge">${premios[posicion]}</span> ` : '';
 
         if (index === clasificacion.length - 1) {
