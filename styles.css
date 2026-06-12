@@ -993,6 +993,13 @@ h2 {
     left: -20px;
 }
 
+.badge-nulo {
+    background: linear-gradient(90deg, #bdbdbd, #9e9e9e);
+    color: #fff;
+    border: 1px solid #757575;
+    left: -20px;
+}
+
 .perfil-header {
   display: flex;
   justify-content: space-between;
@@ -1649,6 +1656,13 @@ footer {
     border-left-color: #8bc34a;
     background: #d4ffa3;
     box-shadow: 0 0 6px rgba(139, 195, 74, 0.35);
+}
+
+.partido-card.acierto-nulo {
+    border-left-color: #9e9e9e;
+    background: linear-gradient(90deg, #e0e0e0, #f0f0f0);
+    box-shadow: 0 0 6px rgba(150, 150, 150, 0.3);
+    color: #555;
 }
 
 /* ==================================================================== */

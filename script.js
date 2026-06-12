@@ -752,7 +752,7 @@ async function marcarAciertosPerfil(useAsync = false) {
         const equipoVisitante = card.querySelector('.equipo-visitante')?.textContent?.trim();
         if (!equipoLocal || !equipoVisitante) return;
 
-        card.classList.remove('acierto-exacto', 'acierto-signo');
+        card.classList.remove('acierto-exacto', 'acierto-signo', 'acierto-nulo');
 
         if (!oficial || !jugador) return;
         if (typeof oficial.local !== 'number' || typeof oficial.visitante !== 'number') return;
@@ -776,7 +776,15 @@ async function marcarAciertosPerfil(useAsync = false) {
             badge.className = 'badge-puntos badge-signo';
             badge.textContent = '+2';
             card.prepend(badge);
+            return;
         }
+
+        // Partido confirmado pero sin puntos
+        card.classList.add('acierto-nulo');
+        const badge = document.createElement('span');
+        badge.className = 'badge-puntos badge-nulo';
+        badge.textContent = '0';
+        card.prepend(badge);
     };
 
     document.querySelectorAll('.partido-card').forEach(card => {
