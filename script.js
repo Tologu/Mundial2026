@@ -675,6 +675,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
                 <td>${item.puntos} <span class="emoji-poop">💩</span></td>
                 <td>${item.aciertos}</td>
+                <td>${item.exactos}</td>
                 ${tdProximo}
             `;
         } else {
@@ -683,6 +684,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
                 <td>${item.aciertos}</td>
+                <td>${item.exactos}</td>
                 ${tdProximo}
             `;
         }
