@@ -621,14 +621,14 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const currentRanking = {};
     clasificacion.forEach((item, idx) => { currentRanking[item.slug] = idx + 1; });
 
-    // Actualizar cabecera de la columna Próximo partido
+    // Actualizar cabecera de la columna Próximo partido (clase, no inline style: el inline anulaba el CSS móvil)
     const thProximo = tabla.querySelector('#th-proximo-partido');
     if (thProximo) {
         if (claveProximo) {
             thProximo.innerHTML = `Próximo partido<br><span class="proximo-match-sub">${claveProximo}</span>`;
-            thProximo.style.display = '';
+            thProximo.classList.remove('col-proximo-oculta');
         } else {
-            thProximo.style.display = 'none';
+            thProximo.classList.add('col-proximo-oculta');
         }
     }
 
@@ -675,6 +675,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
                 <td>${item.puntos} <span class="emoji-poop">💩</span></td>
                 <td>${item.aciertos}</td>
+                <td>${item.exactos}</td>
                 ${tdProximo}
             `;
         } else {
@@ -683,6 +684,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
                 <td>${item.aciertos}</td>
+                <td>${item.exactos}</td>
                 ${tdProximo}
             `;
         }

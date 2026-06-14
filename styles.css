@@ -37,7 +37,7 @@
     pointer-events: none;
 }
 
-#tabla-clasificacion tbody tr:first-child td:last-child {
+#tabla-clasificacion tbody tr:first-child .td-proximo {
     position: relative;
 }
 
@@ -546,6 +546,10 @@ h2 {
     text-align: center;
     line-height: 1.3;
     border-left: 2px solid rgba(255,255,255,0.25);
+}
+
+#th-proximo-partido.col-proximo-oculta {
+    display: none;
 }
 #th-proximo-partido .proximo-match-sub {
     display: block;
