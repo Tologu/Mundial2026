@@ -338,7 +338,9 @@
                 eqs.forEach(e => todosEquipos.add(e));
             }
 
-            if (todosEquipos.size === 0) continue; // ronda sin datos
+            const tieneCampeones = participantes.some(n => todosPronosticos[n]?.['M104']?.ganador);
+            const campeonOficialEq = oficiales['M104']?.ganador;
+            if (todosEquipos.size === 0 && !tieneCampeones && !campeonOficialEq) continue;
 
             const equiposOrdenados = [...todosEquipos].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
@@ -378,14 +380,14 @@
                 html += `</tr>`;
             }
 
-            // Fila especial para campeón (solo en Final)
+            // Fila especial para campeón (solo en Final, M104)
             if (ronda === 'Final') {
-                const campeonOficial = oficiales['campeon'] || null;
+                const campeonOficial = oficiales['M104']?.ganador || null;
                 html += `<tr class="fila-campeon">
-                    <td>🏆 Campeón</td>`;
+                    <td>🏆 Campeón${campeonOficial ? ` <span title="Campeón oficial">(${campeonOficial})</span>` : ''}</td>`;
                 for (const nombre of participantes) {
                     const pros = todosPronosticos[nombre] || {};
-                    const campeonJugador = pros['campeon'] || null;
+                    const campeonJugador = pros['M104']?.ganador || null;
                     let clase = '', texto = campeonJugador || '–';
                     if (campeonOficial && campeonJugador) {
                         clase = campeonOficial === campeonJugador ? 'elim-campeon-ok' : 'elim-fallo';
