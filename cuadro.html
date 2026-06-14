@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cuadro General - Mundial 2026</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ── Cuadro General ───────────────────────────────── */
+        .cuadro-page { max-width: 100%; overflow-x: auto; }
+
+        .cuadro-seccion { margin-bottom: 36px; }
+
+        .cuadro-seccion h2 {
+            font-size: 1.15em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-principal);
+            border-left: 4px solid var(--color-principal);
+            padding-left: 10px;
+            margin: 24px 0 10px;
+        }
+
+        .cuadro-seccion h3 {
+            font-size: 0.95em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #555;
+            margin: 18px 0 6px;
+            padding-left: 4px;
+        }
+
+        /* Main scrollable wrapper */
+        .cuadro-tabla-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 1px solid #d0d7de;
+            margin-bottom: 8px;
+        }
+
+        .cuadro-tabla {
+            border-collapse: collapse;
+            font-size: 0.8em;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .cuadro-tabla thead th {
+            position: sticky;
+            top: 0;
+            background: var(--color-principal);
+            color: #fff;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 700;
+            z-index: 2;
+            border-right: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .cuadro-tabla thead th:first-child {
+            text-align: left;
+            min-width: 220px;
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background: var(--color-principal);
+        }
+
+        /* Separator row for group names */
+        .cuadro-tabla tr.grupo-separador td {
+            background: #e8eef5;
+            color: var(--color-principal);
+            font-weight: 700;
+            font-size: 1em;
+            padding: 5px 10px;
+            border-top: 2px solid #b0c4de;
+            text-align: left;
+            letter-spacing: 1px;
+        }
+
+        .cuadro-tabla tbody td {
+            padding: 5px 8px;
+            text-align: center;
+            border-right: 1px solid #e4e8ec;
+            border-bottom: 1px solid #e4e8ec;
+            min-width: 56px;
+        }
+
+        /* First column: match name */
+        .cuadro-tabla tbody td.celda-partido {
+            text-align: left;
+            min-width: 220px;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            left: 0;
+            background: #f8f9fb;
+            z-index: 1;
+            border-right: 2px solid #d0d7de;
+        }
+
+        .resultado-oficial {
+            display: inline-block;
+            margin-left: 8px;
+            background: var(--color-principal);
+            color: #fff;
+            font-size: 0.82em;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+
+        .cuadro-tabla tbody tr:hover td { background-color: #f0f4f8; }
+        .cuadro-tabla tbody tr:hover td.celda-partido { background-color: #e8eef5; }
+
+        /* Prediction cell coloring */
+        .pred-exacto {
+            background: linear-gradient(135deg, #ffdf20, #e6c800);
+            color: #4a3800;
+            font-weight: 700;
+            border-radius: 4px;
+        }
+        .pred-signo {
+            background: #c8f5a0;
+            color: #2d6000;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+        .pred-nulo {
+            background: #e4e4e4;
+            color: #777;
+            border-radius: 4px;
+        }
+        .pred-vacio { color: #bbb; font-style: italic; font-size: 0.85em; }
+
+        /* Elim round table */
+        .cuadro-elim-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #d0d7de;
+            margin-bottom: 16px;
+        }
+        .cuadro-elim-tabla {
+            border-collapse: collapse;
+            font-size: 0.78em;
+            white-space: nowrap;
+            width: 100%;
+        }
+        .cuadro-elim-tabla thead th {
+            background: #1a5a96;
+            color: #fff;
+            padding: 6px 10px;
+            text-align: center;
+            font-weight: 700;
+            border-right: 1px solid rgba(255,255,255,0.15);
+        }
+        .cuadro-elim-tabla thead th:first-child {
+            text-align: left;
+            min-width: 170px;
+        }
+        .cuadro-elim-tabla tbody td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #e4e8ec;
+            border-right: 1px solid #e4e8ec;
+            text-align: center;
+        }
+        .cuadro-elim-tabla tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+            background: #f8f9fb;
+            min-width: 170px;
+        }
+        .elim-acierto { background: #c8f5a0; color: #2d6000; font-weight: 700; border-radius: 4px; }
+        .elim-fallo   { background: #fde8e8; color: #a00; border-radius: 4px; }
+        .elim-pendiente { color: #aaa; }
+
+        /* Champion row */
+        .cuadro-elim-tabla tr.fila-campeon td:first-child { color: #b8860b; }
+        .elim-campeon-ok { background: linear-gradient(135deg,#ffe082,#fdb927); color:#5a3800; font-weight:800; border-radius:4px; }
+
+        /* Loading */
+        .cuadro-loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #555;
+            font-size: 1.1em;
+        }
+        .cuadro-loading::before {
+            content: '⏳ ';
+        }
+
+        /* Leyenda */
+        .cuadro-leyenda {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            font-size: 0.82em;
+        }
+        .cuadro-leyenda span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .leyenda-box {
+            display: inline-block;
+            width: 22px;
+            height: 16px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><img src="world-cup.png" alt="Copa" class="copa-giratoria"> Mundial 2026 <img src="world-cup.png" alt="Copa" class="copa-giratoria"></h1>
+        <nav>
+            <a href="index.html">Clasificación</a>
+            <a href="partidos.html">Resultados Oficiales</a>
+            <a href="cuadro.html" class="active">Cuadro General</a>
+        </nav>
+    </header>
+
+    <main class="cuadro-page">
+        <div class="header-clasificacion">
+            <h2>Cuadro General de Pronósticos</h2>
+        </div>
+
+        <div id="cuadro-contenido">
+            <div class="cuadro-loading">Cargando pronósticos...</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; Mundial 2026</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+    <script>
+    // ── CUADRO GENERAL ────────────────────────────────────────────────
+
+    const RONDAS_NOMBRES = {
+        R32: 'Dieciseisavos de Final',
+        R16: 'Octavos de Final',
+        R8:  'Cuartos de Final',
+        R4:  'Semifinales',
+        Final: 'Final'
+    };
+
+    function signo(l, v) {
+        if (l > v) return 'L';
+        if (l < v) return 'V';
+        return 'E';
+    }
+
+    function clasePred(pred, oficial) {
+        if (!pred || typeof pred.local !== 'number') return 'pred-vacio';
+        if (!oficial || typeof oficial.local !== 'number') return ''; // sin resultado oficial todavía
+        if (pred.local === oficial.local && pred.visitante === oficial.visitante) return 'pred-exacto';
+        if (signo(pred.local, pred.visitante) === signo(oficial.local, oficial.visitante)) return 'pred-signo';
+        return 'pred-nulo';
+    }
+
+    function textoPred(pred) {
+        if (!pred || typeof pred.local !== 'number') return '<span class="pred-vacio">-</span>';
+        return `${pred.local}-${pred.visitante}`;
+    }
+
+    async function cargarTodosPronosticos() {
+        const resultado = {};
+        const slugs = Object.values(PARTICIPANTES);
+        // Carga en paralelo
+        await Promise.all(
+            Object.entries(PARTICIPANTES).map(async ([nombre, slug]) => {
+                resultado[nombre] = await cargarPronosticosPorDocId(slug);
+            })
+        );
+        return resultado;
+    }
+
+    function renderGrupos(todosPronosticos, oficiales, participantes) {
+        const nombres = participantes; // array de nombres visibles en orden
+        let html = `<div class="cuadro-seccion">
+            <h2>📋 Fase de Grupos</h2>
+            <div class="cuadro-leyenda">
+                <span><span class="leyenda-box pred-exacto"></span> Exacto (+5)</span>
+                <span><span class="leyenda-box pred-signo"></span> Acierto (+2)</span>
+                <span><span class="leyenda-box pred-nulo"></span> Fallo (+0)</span>
+            </div>
+            <div class="cuadro-tabla-wrapper">
+            <table class="cuadro-tabla">
+            <thead><tr>
+                <th>Partido</th>
+                ${nombres.map(n => `<th>${n}</th>`).join('')}
+            </tr></thead>
+            <tbody>`;
+
+        for (const grupo of gruposData) {
+            const partidos = obtenerPartidosDelGrupo(grupo.nombre);
+            html += `<tr class="grupo-separador"><td colspan="${nombres.length + 1}">GRUPO ${grupo.nombre}</td></tr>`;
+            for (const p of partidos) {
+                const clave = `${p.local} vs ${p.visitante}`;
+                const oficial = oficiales[clave];
+                const resultadoHtml = (oficial && typeof oficial.local === 'number')
+                    ? `<span class="resultado-oficial">${oficial.local}-${oficial.visitante}</span>`
+                    : '';
+                html += `<tr>
+                    <td class="celda-partido">${p.local} vs ${p.visitante}${resultadoHtml}</td>`;
+                for (const nombre of nombres) {
+                    const pred = todosPronosticos[nombre]?.[clave];
+                    const clase = clasePred(pred, oficial);
+                    html += `<td class="${clase}">${textoPred(pred)}</td>`;
+                }
+                html += `</tr>`;
+            }
+        }
+
+        html += `</tbody></table></div></div>`;
+        return html;
+    }
+
+    function renderEliminatorias(todosPronosticos, oficiales, participantes) {
+        const rondas = ['R32', 'R16', 'R8', 'R4', 'Final'];
+        let html = `<div class="cuadro-seccion"><h2>🏆 Fase Eliminatoria</h2>`;
+
+        for (const ronda of rondas) {
+            // Recopilar todos los equipos que aparecen en esta ronda (de todos los participantes + oficiales)
+            const equiposOficiales = obtenerEquiposPorRonda(oficiales, ronda, ronda === 'Final');
+            const todosEquipos = new Set(equiposOficiales);
+            for (const nombre of participantes) {
+                const pros = todosPronosticos[nombre] || {};
+                const eqs = obtenerEquiposPorRonda(pros, ronda, ronda === 'Final');
+                eqs.forEach(e => todosEquipos.add(e));
+            }
+
+            if (todosEquipos.size === 0) continue; // ronda sin datos
+
+            const equiposOrdenados = [...todosEquipos].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+            html += `<h3>${RONDAS_NOMBRES[ronda]}</h3>
+                <div class="cuadro-elim-wrapper">
+                <table class="cuadro-elim-tabla">
+                <thead><tr>
+                    <th>Equipo</th>
+                    ${participantes.map(n => `<th>${n}</th>`).join('')}
+                </tr></thead>
+                <tbody>`;
+
+            for (const equipo of equiposOrdenados) {
+                const estaEnOficial = equiposOficiales.has(equipo);
+                html += `<tr>
+                    <td>${equipo}${estaEnOficial ? ' <span title="En resultado oficial">✔️</span>' : ''}</td>`;
+                for (const nombre of participantes) {
+                    const pros = todosPronosticos[nombre] || {};
+                    const equiposJugador = obtenerEquiposPorRonda(pros, ronda, ronda === 'Final');
+                    const tienEquipo = equiposJugador.has(equipo);
+                    if (equiposOficiales.size > 0) {
+                        // hay resultado oficial: marcar acierto o fallo
+                        if (estaEnOficial && tienEquipo) {
+                            html += `<td class="elim-acierto">✓</td>`;
+                        } else if (!estaEnOficial && tienEquipo) {
+                            html += `<td class="elim-fallo">✗</td>`;
+                        } else if (estaEnOficial && !tienEquipo) {
+                            html += `<td class="elim-fallo">–</td>`;
+                        } else {
+                            html += `<td></td>`;
+                        }
+                    } else {
+                        // sin resultado oficial: mostrar si fue elegido
+                        html += `<td class="${tienEquipo ? 'elim-pendiente' : ''}">${tienEquipo ? '✓' : ''}</td>`;
+                    }
+                }
+                html += `</tr>`;
+            }
+
+            // Fila especial para campeón (solo en Final)
+            if (ronda === 'Final') {
+                const campeonOficial = oficiales['campeon'] || null;
+                html += `<tr class="fila-campeon">
+                    <td>🏆 Campeón</td>`;
+                for (const nombre of participantes) {
+                    const pros = todosPronosticos[nombre] || {};
+                    const campeonJugador = pros['campeon'] || null;
+                    let clase = '', texto = campeonJugador || '–';
+                    if (campeonOficial && campeonJugador) {
+                        clase = campeonOficial === campeonJugador ? 'elim-campeon-ok' : 'elim-fallo';
+                    } else if (!campeonJugador) {
+                        texto = '<span class="pred-vacio">–</span>';
+                    }
+                    html += `<td class="${clase}">${texto}</td>`;
+                }
+                html += `</tr>`;
+            }
+
+            html += `</tbody></table></div>`;
+        }
+
+        html += `</div>`;
+        return html;
+    }
+
+    async function iniciarCuadroGeneral() {
+        const contenido = document.getElementById('cuadro-contenido');
+        try {
+            const [todosPronosticos, oficiales] = await Promise.all([
+                cargarTodosPronosticos(),
+                cargarPronosticosOficialesAsync()
+            ]);
+
+            // Orden de participantes (igual que la clasificación: ordenado por nombre)
+            const participantes = Object.keys(PARTICIPANTES).sort((a, b) =>
+                a.localeCompare(b, 'es', { sensitivity: 'base' })
+            );
+
+            const htmlGrupos = renderGrupos(todosPronosticos, oficiales, participantes);
+            const htmlElim = renderEliminatorias(todosPronosticos, oficiales, participantes);
+
+            contenido.innerHTML = htmlGrupos + htmlElim;
+        } catch (e) {
+            console.error(e);
+            contenido.innerHTML = '<div class="cuadro-loading">❌ Error cargando los datos. Inténtalo de nuevo.</div>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (firebaseDisponible) {
+            iniciarCuadroGeneral();
+        } else {
+            document.getElementById('cuadro-contenido').innerHTML =
+                '<div class="cuadro-loading">⚠️ Firebase no disponible. No se pueden cargar los datos.</div>';
+        }
+    });
+    </script>
+</body>
+</html>

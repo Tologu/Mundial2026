@@ -567,26 +567,27 @@ async function actualizarClasificacionIndex(useAsync = false) {
             Object.entries(PARTICIPANTES).map(async ([nombreVisible, slug]) => {
                 const docId = DOC_ID_PARTICIPANTES[slug];
                 const pronosticosJugador = docId ? await cargarPronosticosPorDocId(docId) : {};
-                const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
+                const { puntos, aciertos, exactos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
                 const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
                 const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
-                return { nombreVisible, slug, puntos, aciertos, pronosticoProximo, puntosPorRonda };
+                return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda };
             })
         );
     } else {
         clasificacion = Object.entries(PARTICIPANTES).map(([nombreVisible, slug]) => {
             const config = perfilesConfig[slug];
             const pronosticosJugador = config ? cargarPronosticosPorClave(config.key) : {};
-            const { puntos, aciertos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
+            const { puntos, aciertos, exactos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
             const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
             const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
-            return { nombreVisible, slug, puntos, aciertos, pronosticoProximo, puntosPorRonda };
+            return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda };
         });
     }
 
     clasificacion.sort((a, b) => {
         if (a.puntos !== b.puntos) return b.puntos - a.puntos;
         if (a.aciertos !== b.aciertos) return b.aciertos - a.aciertos;
+        if (a.exactos !== b.exactos) return b.exactos - a.exactos;
         return a.nombreVisible.localeCompare(b.nombreVisible, 'es', { sensitivity: 'base' });
     });
 

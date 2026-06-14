@@ -982,9 +982,9 @@ h2 {
 }
 
 .badge-exacto {
-    background: linear-gradient(90deg, #ffe082, #ffe082);
-    color: #754b00;
-    border: 1px solid #fdb927;
+    background: linear-gradient(90deg, #ffdf20, #e6c800);
+    color: #4a3800;
+    border: 1px solid #c9aa00;
 }
 
 .badge-signo {
@@ -1645,11 +1645,11 @@ footer {
 /* MARCADO DE ACIERTOS EN PERFILES */
 /* ==================================================================== */
 .partido-card.acierto-exacto {
-    border-left-color: #ffc815;
-    background: linear-gradient(90deg, #ffe082, #fdb927, #ffe082);
+    border-left-color: #e6c800;
+    background: linear-gradient(90deg, #ffdf20, #e6c800, #ffdf20);
     background-size: 200% 200%;
     animation: brillo 7s linear infinite, pulso 6s ease-in-out infinite;
-    box-shadow: 4px 2px 20px 3px rgba(253, 185, 39, 0.7);
+    box-shadow: 4px 2px 20px 3px rgba(230, 200, 0, 0.75);
 }
 
 .partido-card.acierto-signo {
