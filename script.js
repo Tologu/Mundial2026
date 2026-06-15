@@ -85,6 +85,27 @@ async function firebaseEliminarComentario(id, listaActual) {
     return lista;
 }
 
+async function firebasePublicarRespuesta(parentId, respuesta, listaActual) {
+    const lista = (Array.isArray(listaActual) ? listaActual : []).map((c) => {
+        if (c.id !== parentId) return c;
+        const respuestas = Array.isArray(c.respuestas) ? c.respuestas.slice() : [];
+        respuestas.push(respuesta);
+        return { ...c, respuestas };
+    });
+    await firebaseGuardarPronosticos(DOC_ID_TABLON, { lista });
+    return lista;
+}
+
+async function firebaseEliminarRespuesta(parentId, respuestaId, listaActual) {
+    const lista = (Array.isArray(listaActual) ? listaActual : []).map((c) => {
+        if (c.id !== parentId) return c;
+        const respuestas = (Array.isArray(c.respuestas) ? c.respuestas : []).filter((r) => r.id !== respuestaId);
+        return { ...c, respuestas };
+    });
+    await firebaseGuardarPronosticos(DOC_ID_TABLON, { lista });
+    return lista;
+}
+
 // Obtener el match del perfil
 const perfilMatch = pathName.match(REGEX_PERFIL);
 const perfilNombre = perfilMatch ? perfilMatch[1] : null;
@@ -2477,6 +2498,67 @@ function formatearFechaComentario(valor) {
     });
 }
 
+function nombresParticipantesOrdenados() {
+    return Object.keys(PARTICIPANTES).sort((a, b) =>
+        a.localeCompare(b, 'es', { sensitivity: 'base' })
+    );
+}
+
+function opcionesParticipantesHtml() {
+    let seleccionado = '';
+    try {
+        const guardado = localStorage.getItem(COMENTARIO_NOMBRE_KEY);
+        if (guardado && PARTICIPANTES[guardado]) seleccionado = guardado;
+    } catch (e) { /* ignorar */ }
+
+    const opciones = nombresParticipantesOrdenados()
+        .map((n) => `<option value="${escaparHtml(n)}"${n === seleccionado ? ' selected' : ''}>${escaparHtml(n)}</option>`)
+        .join('');
+    return `<option value="">Tu nombre...</option>${opciones}`;
+}
+
+function renderRespuestaHtml(parentId, respuesta) {
+    return `
+        <article class="respuesta-item">
+            <div class="comentario-meta">
+                <span class="comentario-avatar comentario-avatar-sm">${escaparHtml((respuesta.nombre || '?').charAt(0).toUpperCase())}</span>
+                <strong class="comentario-autor">${escaparHtml(respuesta.nombre)}</strong>
+                <time class="comentario-fecha">${formatearFechaComentario(respuesta.createdAt)}</time>
+                <button type="button" class="comentario-borrar respuesta-borrar" data-parent="${escaparHtml(parentId)}" data-id="${escaparHtml(respuesta.id || '')}" title="Eliminar respuesta" aria-label="Eliminar respuesta">🗑️</button>
+            </div>
+            <p class="comentario-texto">${escaparHtml(respuesta.texto)}</p>
+        </article>
+    `;
+}
+
+function renderComentarioHtml(comentario) {
+    const id = escaparHtml(comentario.id || '');
+    const respuestas = (Array.isArray(comentario.respuestas) ? comentario.respuestas.slice() : [])
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    const respuestasHtml = respuestas.map((r) => renderRespuestaHtml(comentario.id || '', r)).join('');
+
+    return `
+        <article class="comentario-item">
+            <div class="comentario-meta">
+                <span class="comentario-avatar">${escaparHtml(comentario.nombre.charAt(0).toUpperCase())}</span>
+                <strong class="comentario-autor">${escaparHtml(comentario.nombre)}</strong>
+                <time class="comentario-fecha">${formatearFechaComentario(comentario.createdAt)}</time>
+                <button type="button" class="comentario-borrar" data-id="${id}" title="Eliminar comentario" aria-label="Eliminar comentario">🗑️</button>
+            </div>
+            <p class="comentario-texto">${escaparHtml(comentario.texto)}</p>
+            <div class="comentario-acciones-fila">
+                <button type="button" class="comentario-responder" data-id="${id}">Responder</button>
+            </div>
+            ${respuestasHtml ? `<div class="comentario-respuestas">${respuestasHtml}</div>` : ''}
+            <form class="form-respuesta" data-parent="${id}" hidden>
+                <select class="respuesta-nombre" required>${opcionesParticipantesHtml()}</select>
+                <input type="text" class="respuesta-texto" maxlength="500" placeholder="Escribe una respuesta..." required>
+                <button type="submit" class="btn-respuesta-enviar">Responder</button>
+            </form>
+        </article>
+    `;
+}
+
 function renderizarListaComentarios(comentarios) {
     const lista = document.getElementById('lista-comentarios');
     if (!lista) return;
@@ -2490,17 +2572,7 @@ function renderizarListaComentarios(comentarios) {
     const hayMas = comentarios.length > COMENTARIOS_VISIBLES;
     const visibles = comentariosExpandido ? comentarios : comentarios.slice(0, COMENTARIOS_VISIBLES);
 
-    const itemsHtml = visibles.map((comentario) => `
-        <article class="comentario-item">
-            <div class="comentario-meta">
-                <span class="comentario-avatar">${escaparHtml(comentario.nombre.charAt(0).toUpperCase())}</span>
-                <strong class="comentario-autor">${escaparHtml(comentario.nombre)}</strong>
-                <time class="comentario-fecha">${formatearFechaComentario(comentario.createdAt)}</time>
-            </div>
-            <p class="comentario-texto">${escaparHtml(comentario.texto)}</p>
-            <button type="button" class="comentario-borrar" data-id="${escaparHtml(comentario.id || '')}" title="Eliminar comentario" aria-label="Eliminar comentario">🗑️</button>
-        </article>
-    `).join('');
+    const itemsHtml = visibles.map(renderComentarioHtml).join('');
 
     let botonHtml = '';
     if (hayMas && !comentariosExpandido) {
@@ -2515,10 +2587,7 @@ function renderizarListaComentarios(comentarios) {
 
 function poblarSelectorComentarios(select) {
     if (!select) return;
-    const nombres = Object.keys(PARTICIPANTES).sort((a, b) =>
-        a.localeCompare(b, 'es', { sensitivity: 'base' })
-    );
-    nombres.forEach((nombre) => {
+    nombresParticipantesOrdenados().forEach((nombre) => {
         const option = document.createElement('option');
         option.value = nombre;
         option.textContent = nombre;
@@ -2573,37 +2642,114 @@ function iniciarTablonComentarios() {
             }
         );
 
-    // Mostrar/ocultar mensajes anteriores
-    lista.addEventListener('click', (event) => {
-        const btnMas = event.target.closest('.comentario-cargar-mas');
-        if (!btnMas) return;
-        comentariosExpandido = !btnMas.dataset.colapsar;
-        renderizarListaComentarios(comentariosTablonCache);
-    });
-
-    // Borrado de comentarios (protegido por contraseña)
+    // Clics dentro de la lista: cargar más, responder, borrar comentario, borrar respuesta
     lista.addEventListener('click', async (event) => {
-        const btn = event.target.closest('.comentario-borrar');
-        if (!btn) return;
-
-        const id = btn.dataset.id;
-        if (!id) return;
-
-        const pass = prompt('Introduce la contraseña para eliminar el comentario:');
-        if (pass === null) return;
-        if (pass !== 'Basurita') {
-            alert('Contraseña incorrecta. No se ha eliminado el comentario.');
+        // Mostrar/ocultar mensajes anteriores
+        const btnMas = event.target.closest('.comentario-cargar-mas');
+        if (btnMas) {
+            comentariosExpandido = !btnMas.dataset.colapsar;
+            renderizarListaComentarios(comentariosTablonCache);
             return;
         }
 
-        btn.disabled = true;
+        // Abrir/cerrar el formulario de respuesta
+        const btnResponder = event.target.closest('.comentario-responder');
+        if (btnResponder) {
+            const item = btnResponder.closest('.comentario-item');
+            const formResp = item?.querySelector('.form-respuesta');
+            if (formResp) {
+                formResp.hidden = !formResp.hidden;
+                if (!formResp.hidden) formResp.querySelector('.respuesta-texto')?.focus();
+            }
+            return;
+        }
+
+        // Borrar respuesta (protegido por contraseña)
+        const btnBorrarResp = event.target.closest('.respuesta-borrar');
+        if (btnBorrarResp) {
+            const parentId = btnBorrarResp.dataset.parent;
+            const id = btnBorrarResp.dataset.id;
+            if (!parentId || !id) return;
+            const pass = prompt('Introduce la contraseña para eliminar la respuesta:');
+            if (pass === null) return;
+            if (pass !== 'Basurita') {
+                alert('Contraseña incorrecta. No se ha eliminado la respuesta.');
+                return;
+            }
+            btnBorrarResp.disabled = true;
+            try {
+                comentariosTablonCache = await firebaseEliminarRespuesta(parentId, id, comentariosTablonCache);
+                renderizarListaComentarios(comentariosTablonCache);
+            } catch (error) {
+                console.error(error);
+                alert('No se pudo eliminar la respuesta. Inténtalo de nuevo.');
+                btnBorrarResp.disabled = false;
+            }
+            return;
+        }
+
+        // Borrar comentario (protegido por contraseña)
+        const btn = event.target.closest('.comentario-borrar');
+        if (btn) {
+            const id = btn.dataset.id;
+            if (!id) return;
+            const pass = prompt('Introduce la contraseña para eliminar el comentario:');
+            if (pass === null) return;
+            if (pass !== 'Basurita') {
+                alert('Contraseña incorrecta. No se ha eliminado el comentario.');
+                return;
+            }
+            btn.disabled = true;
+            try {
+                comentariosTablonCache = await firebaseEliminarComentario(id, comentariosTablonCache);
+                renderizarListaComentarios(comentariosTablonCache);
+            } catch (error) {
+                console.error(error);
+                alert('No se pudo eliminar el comentario. Inténtalo de nuevo.');
+                btn.disabled = false;
+            }
+        }
+    });
+
+    // Envío de respuestas a un comentario
+    lista.addEventListener('submit', async (event) => {
+        const formResp = event.target.closest('.form-respuesta');
+        if (!formResp) return;
+        event.preventDefault();
+
+        const parentId = formResp.dataset.parent;
+        const selectResp = formResp.querySelector('.respuesta-nombre');
+        const inputResp = formResp.querySelector('.respuesta-texto');
+        const btnEnviar = formResp.querySelector('.btn-respuesta-enviar');
+        const nombre = selectResp ? selectResp.value.trim() : '';
+        const texto = inputResp ? inputResp.value.trim() : '';
+        const slug = PARTICIPANTES[nombre];
+
+        if (!nombre || !slug) {
+            alert('Elige tu nombre para responder.');
+            return;
+        }
+        if (!texto) return;
+
+        const nuevaRespuesta = {
+            id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            nombre,
+            slug,
+            texto,
+            createdAt: new Date().toISOString()
+        };
+
+        if (btnEnviar) btnEnviar.disabled = true;
         try {
-            comentariosTablonCache = await firebaseEliminarComentario(id, comentariosTablonCache);
+            comentariosTablonCache = await firebasePublicarRespuesta(parentId, nuevaRespuesta, comentariosTablonCache);
+            try {
+                localStorage.setItem(COMENTARIO_NOMBRE_KEY, nombre);
+            } catch (e) { /* ignorar */ }
             renderizarListaComentarios(comentariosTablonCache);
         } catch (error) {
             console.error(error);
-            alert('No se pudo eliminar el comentario. Inténtalo de nuevo.');
-            btn.disabled = false;
+            alert('No se pudo publicar la respuesta. Inténtalo de nuevo.');
+            if (btnEnviar) btnEnviar.disabled = false;
         }
     });
 

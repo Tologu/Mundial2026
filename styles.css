@@ -1940,26 +1940,23 @@ body.perfil-page .tab-button {
 }
 
 .comentario-item {
-    position: relative;
     background: #fff;
     border-radius: 10px;
-    padding: 10px 14px 22px;
+    padding: 10px 14px 12px;
     box-shadow: 0 1px 6px rgba(20, 62, 104, 0.06);
     border: 1px solid #eef1f5;
 }
 
 .comentario-borrar {
-    position: absolute;
-    right: 6px;
-    bottom: 4px;
     border: none;
     background: transparent;
     cursor: pointer;
-    font-size: 0.85em;
+    font-size: 0.82em;
     line-height: 1;
-    padding: 4px;
+    padding: 3px;
     border-radius: 6px;
-    opacity: 0.45;
+    opacity: 0.4;
+    flex-shrink: 0;
     transition: opacity 0.15s, background 0.15s, transform 0.15s;
 }
 
@@ -1971,6 +1968,120 @@ body.perfil-page .tab-button {
 
 .comentario-borrar:disabled {
     opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Acciones (Responder) */
+.comentario-acciones-fila {
+    margin-top: 4px;
+    padding-left: 34px;
+}
+
+.comentario-responder {
+    border: none;
+    background: transparent;
+    color: #6b7785;
+    font-family: inherit;
+    font-size: 0.78em;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 5px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.comentario-responder:hover {
+    color: var(--color-principal);
+    background: #f0f4f8;
+}
+
+/* Respuestas (hilo) */
+.comentario-respuestas {
+    margin-top: 8px;
+    margin-left: 22px;
+    padding-left: 12px;
+    border-left: 2px solid #eef1f5;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.respuesta-item {
+    background: #f9fafc;
+    border: 1px solid #eef1f5;
+    border-radius: 8px;
+    padding: 7px 10px;
+}
+
+.comentario-avatar-sm {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7em;
+}
+
+/* Formulario de respuesta */
+.form-respuesta {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    margin-left: 22px;
+    flex-wrap: wrap;
+}
+
+.form-respuesta[hidden] {
+    display: none;
+}
+
+.form-respuesta .respuesta-nombre {
+    flex: 0 0 120px;
+    padding: 6px 8px;
+    border: 1px solid #d7dee7;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.82em;
+    color: #333;
+    background: #f9fafc;
+}
+
+.form-respuesta .respuesta-texto {
+    flex: 1 1 160px;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1px solid #d7dee7;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.85em;
+    color: #333;
+    background: #f9fafc;
+}
+
+.form-respuesta .respuesta-nombre:focus,
+.form-respuesta .respuesta-texto:focus {
+    outline: none;
+    border-color: var(--color-principal);
+    box-shadow: 0 0 0 3px rgba(20, 62, 104, 0.1);
+    background: #fff;
+}
+
+.btn-respuesta-enviar {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--color-principal) 0%, #1a5a96 100%);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.82em;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-respuesta-enviar:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn-respuesta-enviar:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
