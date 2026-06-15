@@ -67,6 +67,15 @@ async function firebaseBorrarPronosticos(docId) {
     await firebaseDb.collection('pronosticos').doc(docId).delete();
 }
 
+async function firebasePublicarComentario(nombre, slug, texto) {
+    await firebaseDb.collection('comentarios').add({
+        nombre,
+        slug,
+        texto,
+        createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
 // Obtener el match del perfil
 const perfilMatch = pathName.match(REGEX_PERFIL);
 const perfilNombre = perfilMatch ? perfilMatch[1] : null;
@@ -2433,6 +2442,144 @@ function manejarPronosticoEliminatoria(event) {
 
 
 // ====================================================================
+// 8b. TABLÓN DE COMENTARIOS (index.html)
+// ====================================================================
+
+const COMENTARIO_NOMBRE_KEY = 'comentario_nombre_mundial';
+
+function escaparHtml(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+function formatearFechaComentario(timestamp) {
+    if (!timestamp) return '';
+    const fecha = typeof timestamp.toDate === 'function' ? timestamp.toDate() : new Date(timestamp);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderizarListaComentarios(comentarios) {
+    const lista = document.getElementById('lista-comentarios');
+    if (!lista) return;
+
+    if (!comentarios.length) {
+        lista.innerHTML = '<p class="comentarios-vacio">Aún no hay comentarios. ¡Sé el primero en escribir!</p>';
+        return;
+    }
+
+    lista.innerHTML = comentarios.map((comentario) => `
+        <article class="comentario-item">
+            <header class="comentario-meta">
+                <strong class="comentario-autor">${escaparHtml(comentario.nombre)}</strong>
+                <time class="comentario-fecha">${formatearFechaComentario(comentario.createdAt)}</time>
+            </header>
+            <p class="comentario-texto">${escaparHtml(comentario.texto)}</p>
+        </article>
+    `).join('');
+}
+
+function poblarSelectorComentarios(select) {
+    if (!select) return;
+    const nombres = Object.keys(PARTICIPANTES).sort((a, b) =>
+        a.localeCompare(b, 'es', { sensitivity: 'base' })
+    );
+    nombres.forEach((nombre) => {
+        const option = document.createElement('option');
+        option.value = nombre;
+        option.textContent = nombre;
+        select.appendChild(option);
+    });
+
+    try {
+        const nombreGuardado = localStorage.getItem(COMENTARIO_NOMBRE_KEY);
+        if (nombreGuardado && PARTICIPANTES[nombreGuardado]) {
+            select.value = nombreGuardado;
+        }
+    } catch (e) { /* ignorar */ }
+}
+
+function iniciarTablonComentarios() {
+    const form = document.getElementById('form-comentario');
+    const lista = document.getElementById('lista-comentarios');
+    const selectNombre = document.getElementById('comentario-nombre');
+    const textarea = document.getElementById('comentario-texto');
+    const estado = document.getElementById('comentario-estado');
+    const btnPublicar = form?.querySelector('.btn-comentario-publicar');
+
+    if (!form || !lista || !selectNombre || !textarea || !btnPublicar) return;
+
+    poblarSelectorComentarios(selectNombre);
+
+    if (!firebaseDisponible) {
+        lista.innerHTML = '<p class="comentarios-vacio">Firebase no disponible. No se pueden cargar los comentarios.</p>';
+        btnPublicar.disabled = true;
+        return;
+    }
+
+    firebaseDb.collection('comentarios')
+        .orderBy('createdAt', 'desc')
+        .limit(50)
+        .onSnapshot(
+            (snapshot) => {
+                const comentarios = snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    return {
+                        nombre: data.nombre || 'Anónimo',
+                        texto: data.texto || '',
+                        createdAt: data.createdAt || null
+                    };
+                });
+                renderizarListaComentarios(comentarios);
+            },
+            (error) => {
+                console.error(error);
+                lista.innerHTML = '<p class="comentarios-vacio">No se pudieron cargar los comentarios.</p>';
+            }
+        );
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const nombre = selectNombre.value.trim();
+        const texto = textarea.value.trim();
+        const slug = PARTICIPANTES[nombre];
+
+        if (!nombre || !slug) {
+            if (estado) estado.textContent = 'Elige tu nombre en la lista.';
+            return;
+        }
+        if (!texto) {
+            if (estado) estado.textContent = 'Escribe un comentario antes de publicar.';
+            return;
+        }
+
+        btnPublicar.disabled = true;
+        if (estado) estado.textContent = 'Publicando...';
+
+        try {
+            await firebasePublicarComentario(nombre, slug, texto);
+            textarea.value = '';
+            try {
+                localStorage.setItem(COMENTARIO_NOMBRE_KEY, nombre);
+            } catch (e) { /* ignorar */ }
+            if (estado) estado.textContent = 'Comentario publicado.';
+        } catch (error) {
+            console.error(error);
+            if (estado) estado.textContent = 'No se pudo publicar el comentario. Inténtalo de nuevo.';
+        } finally {
+            btnPublicar.disabled = false;
+        }
+    });
+}
+
+// ====================================================================
 // 9. INICIALIZACIÓN
 // ====================================================================
 
@@ -2503,6 +2650,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnReiniciarTotal) {
             btnReiniciarTotal.addEventListener('click', reiniciarTodo);
         }
+
+        iniciarTablonComentarios();
         return;
     }
 
