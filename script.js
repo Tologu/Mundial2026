@@ -67,6 +67,24 @@ async function firebaseBorrarPronosticos(docId) {
     await firebaseDb.collection('pronosticos').doc(docId).delete();
 }
 
+// Documento donde se guardan los comentarios (dentro de la colección 'pronosticos'
+// para reutilizar exactamente las reglas de seguridad que ya funcionan)
+const DOC_ID_TABLON = 'tablon';
+
+async function firebasePublicarComentario(comentario, listaActual) {
+    const lista = Array.isArray(listaActual) ? listaActual.slice() : [];
+    lista.unshift(comentario);
+    const recortada = lista.slice(0, 100);
+    await firebaseGuardarPronosticos(DOC_ID_TABLON, { lista: recortada });
+    return recortada;
+}
+
+async function firebaseEliminarComentario(id, listaActual) {
+    const lista = (Array.isArray(listaActual) ? listaActual : []).filter((c) => c.id !== id);
+    await firebaseGuardarPronosticos(DOC_ID_TABLON, { lista });
+    return lista;
+}
+
 // Obtener el match del perfil
 const perfilMatch = pathName.match(REGEX_PERFIL);
 const perfilNombre = perfilMatch ? perfilMatch[1] : null;
@@ -2433,6 +2451,207 @@ function manejarPronosticoEliminatoria(event) {
 
 
 // ====================================================================
+// 8b. TABLÓN DE COMENTARIOS (index.html)
+// ====================================================================
+
+const COMENTARIO_NOMBRE_KEY = 'comentario_nombre_mundial';
+const COMENTARIOS_VISIBLES = 3;
+let comentariosTablonCache = [];
+let comentariosExpandido = false;
+
+function escaparHtml(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+function formatearFechaComentario(valor) {
+    if (!valor) return '';
+    const fecha = typeof valor.toDate === 'function' ? valor.toDate() : new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderizarListaComentarios(comentarios) {
+    const lista = document.getElementById('lista-comentarios');
+    if (!lista) return;
+
+    if (!comentarios.length) {
+        comentariosExpandido = false;
+        lista.innerHTML = '<p class="comentarios-vacio">Aún no hay comentarios. ¡Sé el primero en escribir!</p>';
+        return;
+    }
+
+    const hayMas = comentarios.length > COMENTARIOS_VISIBLES;
+    const visibles = comentariosExpandido ? comentarios : comentarios.slice(0, COMENTARIOS_VISIBLES);
+
+    const itemsHtml = visibles.map((comentario) => `
+        <article class="comentario-item">
+            <div class="comentario-meta">
+                <span class="comentario-avatar">${escaparHtml(comentario.nombre.charAt(0).toUpperCase())}</span>
+                <strong class="comentario-autor">${escaparHtml(comentario.nombre)}</strong>
+                <time class="comentario-fecha">${formatearFechaComentario(comentario.createdAt)}</time>
+            </div>
+            <p class="comentario-texto">${escaparHtml(comentario.texto)}</p>
+            <button type="button" class="comentario-borrar" data-id="${escaparHtml(comentario.id || '')}" title="Eliminar comentario" aria-label="Eliminar comentario">🗑️</button>
+        </article>
+    `).join('');
+
+    let botonHtml = '';
+    if (hayMas && !comentariosExpandido) {
+        const restantes = comentarios.length - COMENTARIOS_VISIBLES;
+        botonHtml = `<button type="button" class="comentario-cargar-mas">Cargar mensajes anteriores (${restantes})</button>`;
+    } else if (hayMas && comentariosExpandido) {
+        botonHtml = `<button type="button" class="comentario-cargar-mas" data-colapsar="1">Ocultar mensajes anteriores</button>`;
+    }
+
+    lista.innerHTML = itemsHtml + botonHtml;
+}
+
+function poblarSelectorComentarios(select) {
+    if (!select) return;
+    const nombres = Object.keys(PARTICIPANTES).sort((a, b) =>
+        a.localeCompare(b, 'es', { sensitivity: 'base' })
+    );
+    nombres.forEach((nombre) => {
+        const option = document.createElement('option');
+        option.value = nombre;
+        option.textContent = nombre;
+        select.appendChild(option);
+    });
+
+    try {
+        const nombreGuardado = localStorage.getItem(COMENTARIO_NOMBRE_KEY);
+        if (nombreGuardado && PARTICIPANTES[nombreGuardado]) {
+            select.value = nombreGuardado;
+        }
+    } catch (e) { /* ignorar */ }
+}
+
+function ordenarComentarios(lista) {
+    return (Array.isArray(lista) ? lista.slice() : [])
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+function iniciarTablonComentarios() {
+    const form = document.getElementById('form-comentario');
+    const lista = document.getElementById('lista-comentarios');
+    const selectNombre = document.getElementById('comentario-nombre');
+    const textarea = document.getElementById('comentario-texto');
+    const estado = document.getElementById('comentario-estado');
+    const btnPublicar = form?.querySelector('.btn-comentario-publicar');
+
+    if (!form || !lista || !selectNombre || !textarea || !btnPublicar) return;
+
+    poblarSelectorComentarios(selectNombre);
+
+    if (!firebaseDisponible) {
+        lista.innerHTML = '<p class="comentarios-vacio">Firebase no disponible. No se pueden cargar los comentarios.</p>';
+        btnPublicar.disabled = true;
+        return;
+    }
+
+    // Escucha en tiempo real del documento del tablón
+    firebaseDb.collection('pronosticos').doc(DOC_ID_TABLON)
+        .onSnapshot(
+            (snapshot) => {
+                const data = snapshot.exists ? snapshot.data() : {};
+                const listaGuardada = (data && data.pronosticos && Array.isArray(data.pronosticos.lista))
+                    ? data.pronosticos.lista
+                    : [];
+                comentariosTablonCache = ordenarComentarios(listaGuardada);
+                renderizarListaComentarios(comentariosTablonCache);
+            },
+            (error) => {
+                console.error(error);
+                lista.innerHTML = '<p class="comentarios-vacio">No se pudieron cargar los comentarios.</p>';
+            }
+        );
+
+    // Mostrar/ocultar mensajes anteriores
+    lista.addEventListener('click', (event) => {
+        const btnMas = event.target.closest('.comentario-cargar-mas');
+        if (!btnMas) return;
+        comentariosExpandido = !btnMas.dataset.colapsar;
+        renderizarListaComentarios(comentariosTablonCache);
+    });
+
+    // Borrado de comentarios (protegido por contraseña)
+    lista.addEventListener('click', async (event) => {
+        const btn = event.target.closest('.comentario-borrar');
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+        if (!id) return;
+
+        const pass = prompt('Introduce la contraseña para eliminar el comentario:');
+        if (pass === null) return;
+        if (pass !== 'Basurita') {
+            alert('Contraseña incorrecta. No se ha eliminado el comentario.');
+            return;
+        }
+
+        btn.disabled = true;
+        try {
+            comentariosTablonCache = await firebaseEliminarComentario(id, comentariosTablonCache);
+            renderizarListaComentarios(comentariosTablonCache);
+        } catch (error) {
+            console.error(error);
+            alert('No se pudo eliminar el comentario. Inténtalo de nuevo.');
+            btn.disabled = false;
+        }
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const nombre = selectNombre.value.trim();
+        const texto = textarea.value.trim();
+        const slug = PARTICIPANTES[nombre];
+
+        if (!nombre || !slug) {
+            if (estado) estado.textContent = 'Elige tu nombre en la lista.';
+            return;
+        }
+        if (!texto) {
+            if (estado) estado.textContent = 'Escribe un comentario antes de publicar.';
+            return;
+        }
+
+        btnPublicar.disabled = true;
+        if (estado) estado.textContent = 'Publicando...';
+
+        const nuevoComentario = {
+            id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            nombre,
+            slug,
+            texto,
+            createdAt: new Date().toISOString()
+        };
+
+        try {
+            comentariosTablonCache = await firebasePublicarComentario(nuevoComentario, comentariosTablonCache);
+            renderizarListaComentarios(comentariosTablonCache);
+            textarea.value = '';
+            try {
+                localStorage.setItem(COMENTARIO_NOMBRE_KEY, nombre);
+            } catch (e) { /* ignorar */ }
+            if (estado) estado.textContent = 'Comentario publicado.';
+        } catch (error) {
+            console.error(error);
+            if (estado) estado.textContent = 'No se pudo publicar el comentario. Inténtalo de nuevo.';
+        } finally {
+            btnPublicar.disabled = false;
+        }
+    });
+}
+
+// ====================================================================
 // 9. INICIALIZACIÓN
 // ====================================================================
 
@@ -2503,6 +2722,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnReiniciarTotal) {
             btnReiniciarTotal.addEventListener('click', reiniciarTodo);
         }
+
+        iniciarTablonComentarios();
         return;
     }
 
