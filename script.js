@@ -2476,7 +2476,7 @@ function manejarPronosticoEliminatoria(event) {
 // ====================================================================
 
 const COMENTARIO_NOMBRE_KEY = 'comentario_nombre_mundial';
-const COMENTARIOS_VISIBLES = 3;
+const COMENTARIOS_VISIBLES = 5;
 let comentariosTablonCache = [];
 let comentariosExpandido = false;
 
