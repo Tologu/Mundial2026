@@ -68,11 +68,23 @@ async function firebaseBorrarPronosticos(docId) {
 }
 
 async function firebasePublicarComentario(nombre, slug, texto) {
-    await firebaseDb.collection('comentarios').add({
+    const docRef = firebaseDb.collection('pronosticos').doc(DOC_ID_TABLON);
+    const nuevoComentario = {
+        id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         nombre,
         slug,
         texto,
-        createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: new Date().toISOString()
+    };
+
+    await firebaseDb.runTransaction(async (transaction) => {
+        const snap = await transaction.get(docRef);
+        const lista = snap.exists && Array.isArray(snap.data().lista) ? snap.data().lista : [];
+        lista.unshift(nuevoComentario);
+        transaction.set(docRef, {
+            lista: lista.slice(0, 100),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
     });
 }
 
@@ -103,6 +115,7 @@ const perfilesConfig = {
 };
 
 const DOC_ID_OFICIALES = 'oficiales';
+const DOC_ID_TABLON = 'tablon';
 
 // Mapa global de participantes (nombre visible -> slug)
 const PARTICIPANTES = {
@@ -2523,19 +2536,20 @@ function iniciarTablonComentarios() {
         return;
     }
 
-    firebaseDb.collection('comentarios')
-        .orderBy('createdAt', 'desc')
-        .limit(50)
+    firebaseDb.collection('pronosticos').doc(DOC_ID_TABLON)
         .onSnapshot(
             (snapshot) => {
-                const comentarios = snapshot.docs.map((doc) => {
-                    const data = doc.data();
-                    return {
+                const lista = snapshot.exists && Array.isArray(snapshot.data().lista)
+                    ? snapshot.data().lista
+                    : [];
+                const comentarios = lista
+                    .map((data) => ({
                         nombre: data.nombre || 'Anónimo',
                         texto: data.texto || '',
                         createdAt: data.createdAt || null
-                    };
-                });
+                    }))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 50);
                 renderizarListaComentarios(comentarios);
             },
             (error) => {
