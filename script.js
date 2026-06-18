@@ -609,7 +609,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 const { puntos, aciertos, exactos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
                 const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
                 const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
-                return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda };
+                return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda, pronosticos: pronosticosJugador };
             })
         );
     } else {
@@ -619,7 +619,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
             const { puntos, aciertos, exactos } = calcularPuntajePerfil(pronosticosOficiales, pronosticosJugador);
             const pronosticoProximo = claveProximo ? pronosticosJugador[claveProximo] : null;
             const puntosPorRonda = calcularTodosPuntosPorRonda(pronosticosOficiales, pronosticosJugador);
-            return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda };
+            return { nombreVisible, slug, puntos, aciertos, exactos, pronosticoProximo, puntosPorRonda, pronosticos: pronosticosJugador };
         });
     }
 
@@ -633,32 +633,70 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const tbody = tabla.querySelector('tbody');
     if (!tbody) return;
 
-    // Sistema de flechas persistentes:
-    // RANKING_PREV: ranking antes del último cambio de puntos (para comparar)
-    // RANKING_CURR: ranking del último render (pasa a PREV cuando cambian puntos)
-    // SCORES_KEY:   hash de puntos del último render (detecta cambios reales)
-    const RANKING_PREV_KEY = 'ranking_prev_mundial';
-    const RANKING_CURR_KEY = 'ranking_curr_mundial';
-    const SCORES_KEY = 'scores_hash_mundial';
+    // ----------------------------------------------------------------
+    // Flechas de movimiento (COMPARTIDAS y DETERMINISTAS)
+    // ----------------------------------------------------------------
+    // En lugar de depender de "la última visita" de cada móvil (localStorage), la flecha
+    // compara el ranking ACTUAL contra el ranking que había ANTES de la TANDA de partidos
+    // más reciente. Como esto se calcula a partir de los resultados oficiales (que son los
+    // mismos para todos) y de sus timestamps, TODOS ven exactamente las mismas flechas.
+    //
+    // "Tanda" = grupo de partidos confirmados muy seguidos en el tiempo. Si entre dos
+    // resultados pasa más de BATCH_GAP_MS, se considera que empieza una tanda nueva. Así,
+    // si por la noche se confirman 3-4 partidos seguidos, al despertarse la flecha muestra
+    // el movimiento NETO de toda la noche (frente al ranking previo a esa tanda).
+    const BATCH_GAP_MS = 6 * 60 * 60 * 1000; // 6 horas
 
-    let rankingAnterior = {};
-    let rankingCurr = {};
-    let storedScoresHash = '';
-    try {
-        rankingAnterior = JSON.parse(localStorage.getItem(RANKING_PREV_KEY) || '{}');
-        rankingCurr    = JSON.parse(localStorage.getItem(RANKING_CURR_KEY) || '{}');
-        storedScoresHash = localStorage.getItem(SCORES_KEY) || '';
-    } catch (e) { /* ignorar */ }
-
-    // Hash de puntos actual: slug:puntos:aciertos por participante (ordenado)
-    const currentScoresHash = clasificacion
-        .map(item => `${item.slug}:${item.puntos}:${item.aciertos}`)
-        .sort()
-        .join('|');
-
-    // Mapa del ranking actual
+    // Mapa del ranking actual (slug -> posición)
     const currentRanking = {};
     clasificacion.forEach((item, idx) => { currentRanking[item.slug] = idx + 1; });
+
+    // Timestamps (ms) de los resultados oficiales que tienen marca de tiempo
+    const tsResultados = Object.values(pronosticosOficiales)
+        .map(dato => (dato && dato.timestamp) ? new Date(dato.timestamp).getTime() : NaN)
+        .filter(t => !isNaN(t))
+        .sort((a, b) => a - b);
+
+    // Inicio de la tanda más reciente: retrocedemos desde el último resultado mientras la
+    // separación con el anterior sea <= BATCH_GAP_MS.
+    let inicioTandaTs = Infinity;
+    if (tsResultados.length > 0) {
+        inicioTandaTs = tsResultados[tsResultados.length - 1];
+        for (let i = tsResultados.length - 1; i > 0; i--) {
+            if (tsResultados[i] - tsResultados[i - 1] <= BATCH_GAP_MS) {
+                inicioTandaTs = tsResultados[i - 1];
+            } else {
+                break;
+            }
+        }
+    }
+
+    // Resultados oficiales ANTERIORES a la tanda actual (los sin timestamp se consideran
+    // antiguos y entran siempre en la base de comparación).
+    const oficialesAntesDeTanda = {};
+    Object.entries(pronosticosOficiales).forEach(([clave, dato]) => {
+        const ts = (dato && dato.timestamp) ? new Date(dato.timestamp).getTime() : NaN;
+        if (isNaN(ts) || ts < inicioTandaTs) {
+            oficialesAntesDeTanda[clave] = dato;
+        }
+    });
+
+    // Ranking anterior (antes de la tanda). Si no hay resultados previos, no hay base de
+    // comparación y las flechas quedan neutras.
+    let rankingAnterior = {};
+    if (Object.keys(oficialesAntesDeTanda).length > 0) {
+        const clasifAnterior = clasificacion.map(item => {
+            const { puntos, aciertos, exactos } = calcularPuntajePerfil(oficialesAntesDeTanda, item.pronosticos || {});
+            return { slug: item.slug, nombreVisible: item.nombreVisible, puntos, aciertos, exactos };
+        });
+        clasifAnterior.sort((a, b) => {
+            if (a.puntos !== b.puntos) return b.puntos - a.puntos;
+            if (a.aciertos !== b.aciertos) return b.aciertos - a.aciertos;
+            if (a.exactos !== b.exactos) return b.exactos - a.exactos;
+            return a.nombreVisible.localeCompare(b.nombreVisible, 'es', { sensitivity: 'base' });
+        });
+        clasifAnterior.forEach((item, idx) => { rankingAnterior[item.slug] = idx + 1; });
+    }
 
     // Actualizar cabecera de la columna Próximo partido (clase, no inline style: el inline anulaba el CSS móvil)
     const thProximo = tabla.querySelector('#th-proximo-partido');
@@ -730,20 +768,6 @@ async function actualizarClasificacionIndex(useAsync = false) {
         tbody.appendChild(fila);
     });
 
-    // Solo actualizar el snapshot si los puntos cambiaron (nueva confirmación de resultado)
-    // Así las flechas persisten entre recargas de página
-    try {
-        if (currentScoresHash !== storedScoresHash) {
-            // Los puntos cambiaron: el ranking "actual" anterior pasa a ser el "previo"
-            // (comparación para flechas) y guardamos el nuevo como "actual"
-            localStorage.setItem(RANKING_PREV_KEY, JSON.stringify(rankingCurr));
-            localStorage.setItem(RANKING_CURR_KEY, JSON.stringify(currentRanking));
-            localStorage.setItem(SCORES_KEY, currentScoresHash);
-        } else {
-            // Sin cambio de puntos (recarga): solo actualizamos CURR por seguridad
-            localStorage.setItem(RANKING_CURR_KEY, JSON.stringify(currentRanking));
-        }
-    } catch (e) { /* ignorar */ }
 
     // Si el torneo terminó, mostrar ganador de la porra en el aviso
     if (avisoEl && pronosticosOficiales['M104']?.ganador && clasificacion.length > 0) {
