@@ -659,6 +659,10 @@ async function actualizarClasificacionIndex(useAsync = false) {
     // a cero, no resaltamos a nadie como campeón ni colista).
     const hayDistincion = totalGrupos > 1;
 
+    // Nº de participantes en cada grupo de empate (para repartir el premio entre ellos).
+    const tamGrupo = {};
+    denseRanks.forEach(r => { tamGrupo[r] = (tamGrupo[r] || 0) + 1; });
+
     const tbody = tabla.querySelector('tbody');
     if (!tbody) return;
 
@@ -777,8 +781,16 @@ async function actualizarClasificacionIndex(useAsync = false) {
             ? `<td class="td-proximo${textoProximo === '—' ? ' td-proximo-vacio' : ''}">${textoProximo}</td>`
             : '';
 
-        const premios = ['', '+20€', '+4€', '+2€'];
-        const premioBadge = (hayDistincion && rank <= 3) ? `<span class="premio-badge">${premios[rank]}</span> ` : '';
+        // Premios por grupo: oro 20€, plata 4€, bronce 2€. Si varios empatan en un puesto,
+        // el premio de ese puesto se reparte entre ellos (p. ej. empate a 1º => 10€ cada uno).
+        const premiosTotales = [0, 20, 4, 2];
+        const formatearPremio = (valor) => {
+            const txt = Number.isInteger(valor) ? String(valor) : valor.toFixed(2).replace('.', ',');
+            return `+${txt}€`;
+        };
+        const premioBadge = (hayDistincion && rank <= 3)
+            ? `<span class="premio-badge">${formatearPremio(premiosTotales[rank] / tamGrupo[rank])}</span> `
+            : '';
 
         if (esUltimo) {
             fila.classList.add('puesto-ultimo');
