@@ -492,31 +492,31 @@ function obtenerListaPartidosGrupos() {
         'Inglaterra vs Ghana',              // 23 Jun
         'Panamá vs Croacia',                // 24 Jun
         'Colombia vs RD Congo',             // 24 Jun
-        // Jornada 3
+        // Jornada 3 (orden cronológico real FIFA)
+        'Suiza vs Canadá',                  // 24 Jun
+        'Bosnia vs Catar',                  // 24 Jun
         'Escocia vs Brasil',                // 24 Jun
         'Marruecos vs Haití',              // 24 Jun
-        'Suiza vs Canadá',                  // 25 Jun
-        'Bosnia vs Catar',                  // 25 Jun
-        'Sudáfrica vs Corea del Sur',       // 25 Jun
         'Rep. Checa vs México',             // 25 Jun
-        'Paraguay vs Australia',            // 26 Jun
+        'Sudáfrica vs Corea del Sur',       // 25 Jun
+        'Curazao vs Costa de Marfil',       // 25 Jun
+        'Ecuador vs Alemania',              // 25 Jun
+        'Japón vs Suecia',                  // 25 Jun
+        'Túnez vs Países Bajos',            // 25 Jun
         'Turquía vs Estados Unidos',        // 26 Jun
-        'Túnez vs Países Bajos',            // 26 Jun
-        'Japón vs Suecia',                  // 26 Jun
-        'Ecuador vs Alemania',              // 26 Jun
-        'Curazao vs Costa de Marfil',       // 26 Jun
+        'Paraguay vs Australia',            // 26 Jun
+        'Noruega vs Francia',               // 26 Jun
+        'Senegal vs Irak',                  // 26 Jun
+        'Cabo Verde vs Arabia Saudita',     // 27 Jun
+        'Uruguay vs España',                // 27 Jun
         'Egipto vs Irán',                   // 27 Jun
         'Nueva Zelanda vs Bélgica',         // 27 Jun
-        'Uruguay vs España',                // 27 Jun
-        'Cabo Verde vs Arabia Saudita',     // 27 Jun
-        'Senegal vs Irak',                  // 27 Jun
-        'Noruega vs Francia',               // 27 Jun
-        'Argelia vs Austria',               // 27 Jun
-        'Jordania vs Argentina',            // 27 Jun
-        'Croacia vs Ghana',                 // 27 Jun
         'Panamá vs Inglaterra',             // 27 Jun
-        'RD Congo vs Uzbekistán',           // 27 Jun
+        'Croacia vs Ghana',                 // 27 Jun
         'Colombia vs Portugal',             // 27 Jun
+        'RD Congo vs Uzbekistán',           // 27 Jun
+        'Argelia vs Austria',               // 28 Jun
+        'Jordania vs Argentina',            // 28 Jun
     ];
 }
 
