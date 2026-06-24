@@ -630,6 +630,35 @@ async function actualizarClasificacionIndex(useAsync = false) {
         return a.nombreVisible.localeCompare(b.nombreVisible, 'es', { sensitivity: 'base' });
     });
 
+    // ----------------------------------------------------------------
+    // Posiciones con EMPATES
+    // ----------------------------------------------------------------
+    // Dos participantes que empatan a todo (puntos, aciertos y aciertos exactos) comparten
+    // el mismo número de puesto. Se usan dos numeraciones:
+    //  - posiciones[]: el puesto que se MUESTRA (1, 2, 2, 4, ...). Si el 5º y el 6º empatan,
+    //    ambos son "5" y el siguiente es "7".
+    //  - denseRanks[]: el rango por GRUPO de empate (1, 2, 2, 3, ...). Determina las medallas
+    //    y premios: oro = grupo 1, plata = grupo 2, bronce = grupo 3. Así, si el 2º y el 3º
+    //    empatan, ambos son plata y el bronce pasa al 4º puesto (que es el 3er grupo).
+    const mismoPuesto = (a, b) => !!a && !!b &&
+        a.puntos === b.puntos && a.aciertos === b.aciertos && a.exactos === b.exactos;
+    const posiciones = [];
+    const denseRanks = [];
+    let grupoActual = 0;
+    clasificacion.forEach((item, idx) => {
+        if (idx > 0 && mismoPuesto(item, clasificacion[idx - 1])) {
+            posiciones[idx] = posiciones[idx - 1];
+        } else {
+            posiciones[idx] = idx + 1;
+            grupoActual += 1;
+        }
+        denseRanks[idx] = grupoActual;
+    });
+    const totalGrupos = grupoActual;
+    // Solo aplicamos medallas/último puesto si hay diferencias reales (al inicio, con todos
+    // a cero, no resaltamos a nadie como campeón ni colista).
+    const hayDistincion = totalGrupos > 1;
+
     const tbody = tabla.querySelector('tbody');
     if (!tbody) return;
 
@@ -646,10 +675,6 @@ async function actualizarClasificacionIndex(useAsync = false) {
     // si por la noche se confirman 3-4 partidos seguidos, al despertarse la flecha muestra
     // el movimiento NETO de toda la noche (frente al ranking previo a esa tanda).
     const BATCH_GAP_MS = 6 * 60 * 60 * 1000; // 6 horas
-
-    // Mapa del ranking actual (slug -> posición)
-    const currentRanking = {};
-    clasificacion.forEach((item, idx) => { currentRanking[item.slug] = idx + 1; });
 
     // Timestamps (ms) de los resultados oficiales que tienen marca de tiempo
     const tsResultados = Object.values(pronosticosOficiales)
@@ -695,7 +720,13 @@ async function actualizarClasificacionIndex(useAsync = false) {
             if (a.exactos !== b.exactos) return b.exactos - a.exactos;
             return a.nombreVisible.localeCompare(b.nombreVisible, 'es', { sensitivity: 'base' });
         });
-        clasifAnterior.forEach((item, idx) => { rankingAnterior[item.slug] = idx + 1; });
+        // Posiciones con empates también en el ranking anterior, para que las flechas comparen
+        // el puesto MOSTRADO (con empates) y no salgan flechas falsas al empatar.
+        clasifAnterior.forEach((item, idx) => {
+            rankingAnterior[item.slug] = (idx > 0 && mismoPuesto(item, clasifAnterior[idx - 1]))
+                ? rankingAnterior[clasifAnterior[idx - 1].slug]
+                : idx + 1;
+        });
     }
 
     // Actualizar cabecera de la columna Próximo partido (clase, no inline style: el inline anulaba el CSS móvil)
@@ -711,10 +742,11 @@ async function actualizarClasificacionIndex(useAsync = false) {
 
     tbody.innerHTML = '';
     clasificacion.forEach((item, index) => {
-        const posicion = index + 1;
+        const posicion = posiciones[index];
+        const rank = denseRanks[index];
         const fila = document.createElement('tr');
-        const emojiPodio = posicion === 2 ? '🥈' : posicion === 3 ? '🥉' : '';
-        const emojiCorona = posicion === 1 ? '<span class="emoji-corona">👑</span>' : '';
+        const emojiPodio = (hayDistincion && rank === 2) ? '🥈' : (hayDistincion && rank === 3) ? '🥉' : '';
+        const emojiCorona = (hayDistincion && rank === 1) ? '<span class="emoji-corona">👑</span>' : '';
 
         // Calcular flecha de movimiento
         const todosACero = clasificacion.every(p => p.puntos === 0);
@@ -730,22 +762,25 @@ async function actualizarClasificacionIndex(useAsync = false) {
             flechaHtml = `<span class="flecha-ranking flecha-baja" title="Bajó ${diff} puesto${diff > 1 ? 's' : ''}">▼</span>`;
         }
 
-        if (posicion === 2) {
+        if (hayDistincion && rank === 2) {
             fila.classList.add('puesto-plata');
-        } else if (posicion === 3) {
+        } else if (hayDistincion && rank === 3) {
             fila.classList.add('puesto-bronce');
         }
 
-        // Último puesto
+        // Último puesto (todo el último grupo de empate comparte el formato de colista).
+        // rank > 3 evita que un puesto de podio se marque también como colista si hubiera
+        // muy pocos grupos de empate.
+        const esUltimo = hayDistincion && rank === totalGrupos && rank > 3;
         const textoProximo = obtenerTextoPronosticoProximo(item.pronosticoProximo, claveProximo);
         const tdProximo = claveProximo
             ? `<td class="td-proximo${textoProximo === '—' ? ' td-proximo-vacio' : ''}">${textoProximo}</td>`
             : '';
 
         const premios = ['', '+20€', '+4€', '+2€'];
-        const premioBadge = posicion <= 3 ? `<span class="premio-badge">${premios[posicion]}</span> ` : '';
+        const premioBadge = (hayDistincion && rank <= 3) ? `<span class="premio-badge">${premios[rank]}</span> ` : '';
 
-        if (index === clasificacion.length - 1) {
+        if (esUltimo) {
             fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
                 <td>${premioBadge}${posicion}${flechaHtml} <span class="emoji-clown">🤡</span></td>
