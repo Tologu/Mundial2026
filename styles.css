@@ -2,7 +2,7 @@
 .ultimo-puesto {
     display: inline-block;
     vertical-align: middle;
-    animation: giro-clown 8s linear infinite;
+    animation: giro-clown 1s linear infinite;
     color: #e53935;
     font-weight: bold;
     text-shadow: 0 2px 8px #fff, 0 0 2px #e53935;
@@ -52,7 +52,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto 18px auto;
     padding: 14px 20px;
     background: linear-gradient(135deg, var(--color-principal) 0%, #1a5a96 100%);
@@ -91,7 +91,7 @@
 #ultimo-resultado-aviso .aviso-scroll {
     display: inline-block;
     white-space: nowrap;
-    animation: marquee-aviso 18s linear infinite;
+    animation: marquee-aviso 36s linear infinite;
 }
 
 @keyframes marquee-aviso {
@@ -472,19 +472,19 @@ h2 {
 /* CLASIFICACIÓN (index.html) */
 #tabla-clasificacion {
     width: auto;
-    min-width: 500px;
-    max-width: 1200px;
+    min-width: 620px;
+    max-width: 1400px;
     margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
     box-shadow: 0 4px 20px rgba(20, 62, 104, 0.2);
     border-radius: 12px;
     overflow: hidden;
-    font-size: 1em;
+    font-size: 1.2em;
 }
 
 #tabla-clasificacion th, #tabla-clasificacion td {
-    padding: 14px 18px;
+    padding: 18px 24px;
     text-align: center;
     border-bottom: 1px solid #e0e0e0;
     position: relative;
@@ -494,8 +494,8 @@ h2 {
 /* Columna posición: ancho fijo para que el badge no la expanda */
 #tabla-clasificacion th:first-child,
 #tabla-clasificacion td:first-child {
-    width: 120px;
-    min-width: 120px;
+    width: 140px;
+    min-width: 140px;
 }
 
 #tabla-clasificacion thead {
@@ -504,7 +504,7 @@ h2 {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-size: 0.9em;
+    font-size: 0.95em;
 }
 
 #tabla-clasificacion tbody tr:nth-child(even) {
