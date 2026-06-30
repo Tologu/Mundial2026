@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>🏆 Clasificación Mundial 2026</title>
-    <link rel="stylesheet" href="styles.css?v=20260630c">
+    <link rel="stylesheet" href="styles.css?v=20260630i">
 </head>
 <body>
     <header>
@@ -40,6 +40,7 @@
             <h2 id="bracket-mundial-titulo">🏆 Cuadro de Eliminatorias</h2>
             <div class="bracket-leyenda">
                 <span><span class="leyenda-box bracket-ganador"></span> Equipo que avanza</span>
+                <span><span class="leyenda-box bracket-equipo-clic"></span> Pulsa cualquier equipo para ver acertantes</span>
                 <span><span class="leyenda-box bracket-perdedor"></span> Equipo eliminado</span>
                 <span><span class="leyenda-box bracket-tbd"></span> Por determinar</span>
             </div>
@@ -95,6 +96,15 @@
         </div>
     </div>
 
+    <!-- Modal de acertantes del cuadro eliminatorio -->
+    <div id="modal-bracket-acertantes" class="modal modal-hidden">
+        <div class="modal-content modal-desglose">
+            <span class="close-modal-bracket">&times;</span>
+            <h2 id="bracket-acertantes-titulo">Acertantes</h2>
+            <div id="bracket-acertantes-contenido" class="desglose-contenido"></div>
+        </div>
+    </div>
+
     <!-- Modal de desglose de aciertos -->
     <div id="modal-desglose-aciertos" class="modal modal-hidden">
         <div class="modal-content modal-desglose">
@@ -142,6 +152,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260630f"></script>
+    <script src="script.js?v=20260630i"></script>
 </body>
 </html>

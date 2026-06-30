@@ -660,17 +660,40 @@ function calcularBracketOficialCompleto(pronosticosOficiales) {
     return partidos;
 }
 
-function bracketEquipoHtml(equipo, esGanador, hayGanador) {
+let equiposCuadroPorRondaCache = {};
+
+function construirEquiposCuadroPorRonda(bracket) {
+    const porRonda = { R32: new Set(), R16: new Set(), R8: new Set(), R4: new Set(), Final: new Set() };
+    Object.values(bracket).forEach(m => {
+        if (!m?.ronda) return;
+        if (m.equipo1) porRonda[m.ronda].add(m.equipo1);
+        if (m.equipo2) porRonda[m.ronda].add(m.equipo2);
+    });
+    return porRonda;
+}
+
+function esEquipoClicableBracket(equipo, ronda, equiposCuadroPorRonda) {
+    if (!equipo || !ronda) return false;
+    const set = equiposCuadroPorRonda?.[ronda];
+    return set ? set.has(equipo) : false;
+}
+
+function bracketEquipoHtml(equipo, esGanador, hayGanador, ronda, esClicable) {
     if (!equipo) {
         return `<span class="bracket-equipo bracket-tbd">Por determinar</span>`;
     }
     let clase = 'bracket-equipo';
     if (hayGanador) clase += esGanador ? ' bracket-ganador' : ' bracket-perdedor';
     const trofeo = (esGanador && hayGanador) ? '🏆 ' : '';
-    return `<span class="${clase}">${trofeo}${equipo}</span>`;
+    const texto = `${trofeo}${escaparHtml(equipo)}`;
+
+    if (esClicable) {
+        return `<button type="button" class="${clase} bracket-equipo-clic" data-equipo="${encodeURIComponent(equipo)}" data-ronda="${ronda}" title="Ver quién lo acertó">${texto}</button>`;
+    }
+    return `<span class="${clase}">${texto}</span>`;
 }
 
-function bracketPartidoHtml(match, claseExtra) {
+function bracketPartidoHtml(match, claseExtra, equiposCuadroPorRonda) {
     if (!match) {
         return `<div class="bracket-partido bracket-partido-vacio${claseExtra ? ' ' + claseExtra : ''}">
             ${bracketEquipoHtml(null)}
@@ -678,13 +701,18 @@ function bracketPartidoHtml(match, claseExtra) {
         </div>`;
     }
     const hayGanador = !!match.ganador;
+    const ronda = match.ronda;
+    const clic1 = esEquipoClicableBracket(match.equipo1, ronda, equiposCuadroPorRonda);
+    const clic2 = esEquipoClicableBracket(match.equipo2, ronda, equiposCuadroPorRonda);
     return `<div class="bracket-partido${claseExtra ? ' ' + claseExtra : ''}">
-        ${bracketEquipoHtml(match.equipo1, match.ganador === match.equipo1, hayGanador)}
-        ${bracketEquipoHtml(match.equipo2, match.ganador === match.equipo2, hayGanador)}
+        ${bracketEquipoHtml(match.equipo1, match.ganador === match.equipo1, hayGanador, ronda, clic1)}
+        ${bracketEquipoHtml(match.equipo2, match.ganador === match.equipo2, hayGanador, ronda, clic2)}
     </div>`;
 }
 
 function renderizarBracketMundialHtml(bracket, ordenPorRonda) {
+    const equiposCuadroPorRonda = construirEquiposCuadroPorRonda(bracket);
+
     const rondas = [
         { id: 'R32', nombre: 'Dieciseisavos' },
         { id: 'R16', nombre: 'Octavos' },
@@ -700,7 +728,7 @@ function renderizarBracketMundialHtml(bracket, ordenPorRonda) {
             <h3 class="bracket-ronda-titulo">${nombre}</h3>
             <div class="bracket-ronda-partidos">`;
         llaves.forEach(llave => {
-            html += bracketPartidoHtml(bracket[`M${llave}`]);
+            html += bracketPartidoHtml(bracket[`M${llave}`], '', equiposCuadroPorRonda);
         });
         html += `</div></div>`;
     });
@@ -713,7 +741,77 @@ function actualizarBracketMundialIndex(pronosticosOficiales) {
     if (!contenedor) return;
     const bracket = calcularBracketOficialCompleto(pronosticosOficiales);
     const ordenPorRonda = obtenerOrdenVisualBracket();
+    equiposCuadroPorRondaCache = construirEquiposCuadroPorRonda(bracket);
     contenedor.innerHTML = renderizarBracketMundialHtml(bracket, ordenPorRonda);
+}
+
+const PUNTOS_PRESENCIA_RONDA = { R32: 2, R16: 3, R8: 5, R4: 7, Final: 12 };
+
+let todosPronosticosIndexCache = {};
+
+function obtenerAcertantesEquipoElim(equipo, ronda) {
+    const soloFinal = ronda === 'Final';
+    const oficiales = obtenerEquiposPorRonda(pronosticosOficialesIndexCache, ronda, soloFinal);
+    if (!oficiales.has(equipo)) return { acertantes: [], ptsPresencia: PUNTOS_PRESENCIA_RONDA[ronda] || 0 };
+
+    const ptsPresencia = PUNTOS_PRESENCIA_RONDA[ronda] || 0;
+    const campeonOficial = pronosticosOficialesIndexCache['M104']?.ganador;
+    const acertantes = [];
+
+    Object.entries(todosPronosticosIndexCache).forEach(([nombre, pros]) => {
+        const equiposJugador = obtenerEquiposPorRonda(pros, ronda, soloFinal);
+        if (!equiposJugador.has(equipo)) return;
+
+        let puntos = ptsPresencia;
+        let bonusCampeon = 0;
+        if (ronda === 'Final' && campeonOficial === equipo && pros['M104']?.ganador === equipo) {
+            bonusCampeon = 8;
+            puntos += 8;
+        }
+        acertantes.push({ nombre, puntos, bonusCampeon, ptsPresencia });
+    });
+
+    acertantes.sort((a, b) =>
+        b.puntos - a.puntos || a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+    );
+    return { acertantes, ptsPresencia };
+}
+
+function renderizarAcertantesEquipoHtml(equipo, ronda, { acertantes, ptsPresencia }) {
+    const nombreRonda = NOMBRES_RONDA_ELIM[ronda] || ronda;
+    let html = `<p class="desglose-resumen">${nombreRonda} · +${ptsPresencia} pts por acierto</p>`;
+
+    if (!acertantes.length) {
+        html += '<p class="desglose-vacio">Nadie lo tenía en su cuadro.</p>';
+        return html;
+    }
+
+    html += '<ul class="desglose-lista">';
+    acertantes.forEach(({ nombre, puntos, bonusCampeon, ptsPresencia: ptsBase }) => {
+        const detalleBonus = bonusCampeon
+            ? ` <span class="desglose-pts-detalle">(+${ptsBase} + ${bonusCampeon} campeón)</span>`
+            : '';
+        html += `<li><strong>${escaparHtml(nombre)}</strong> <span class="desglose-pts">+${puntos} pts</span>${detalleBonus}</li>`;
+    });
+    html += '</ul>';
+    return html;
+}
+
+function mostrarModalAcertantesEquipo(equipo, ronda) {
+    const modal = document.getElementById('modal-bracket-acertantes');
+    const contenido = document.getElementById('bracket-acertantes-contenido');
+    const titulo = document.getElementById('bracket-acertantes-titulo');
+    if (!modal || !contenido) return;
+
+    const resultado = obtenerAcertantesEquipoElim(equipo, ronda);
+    if (titulo) titulo.textContent = `Acertantes: ${equipo}`;
+    contenido.innerHTML = renderizarAcertantesEquipoHtml(equipo, ronda, resultado);
+    modal.classList.remove('modal-hidden');
+}
+
+function cerrarModalBracketAcertantes() {
+    const modal = document.getElementById('modal-bracket-acertantes');
+    if (modal) modal.classList.add('modal-hidden');
 }
 
 async function obtenerAcertantesExactos(nombrePartido, useAsync = false) {
@@ -877,8 +975,6 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const pronosticosOficiales = useAsync
         ? await cargarPronosticosOficialesAsync()
         : cargarPronosticosPorClave(perfilesConfig.partidos.key);
-
-    actualizarBracketMundialIndex(pronosticosOficiales);
 
     const claveProximo = obtenerProximoPartidoClave(pronosticosOficiales);
 
@@ -1147,6 +1243,11 @@ async function actualizarClasificacionIndex(useAsync = false) {
 
     pronosticosOficialesIndexCache = pronosticosOficiales;
     clasificacionIndexCache = clasificacion;
+    todosPronosticosIndexCache = {};
+    clasificacion.forEach(item => {
+        todosPronosticosIndexCache[item.nombreVisible] = item.pronosticos || {};
+    });
+    actualizarBracketMundialIndex(pronosticosOficiales);
 
     // Si el torneo terminó, mostrar ganador de la porra en el aviso
     if (avisoEl && pronosticosOficiales['M104']?.ganador && clasificacion.length > 0) {
@@ -3289,6 +3390,27 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             mostrarModalDesgloseAciertos(celda.dataset.nombre, celda.dataset.slug);
         });
+
+        const bracketMundial = document.getElementById('bracket-mundial');
+        const modalBracket = document.getElementById('modal-bracket-acertantes');
+        const closeBracket = document.querySelector('.close-modal-bracket');
+        if (modalBracket) {
+            if (closeBracket) {
+                closeBracket.addEventListener('click', cerrarModalBracketAcertantes);
+            }
+            modalBracket.addEventListener('click', (event) => {
+                if (event.target === modalBracket) cerrarModalBracketAcertantes();
+            });
+        }
+        if (bracketMundial) {
+            bracketMundial.addEventListener('click', (event) => {
+                const btn = event.target.closest('.bracket-equipo-clic');
+                if (!btn) return;
+                const equipo = decodeURIComponent(btn.dataset.equipo || '');
+                const ronda = btn.dataset.ronda;
+                if (equipo && ronda) mostrarModalAcertantesEquipo(equipo, ronda);
+            });
+        }
 
         // Botón de reinicio total (en index.html)
         const btnReiniciarTotal = document.getElementById('btn-reiniciar-app-total');

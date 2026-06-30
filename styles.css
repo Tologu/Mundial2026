@@ -1987,6 +1987,48 @@ body.perfil-page .tab-button {
     font-weight: 700;
 }
 
+.bracket-equipo-clic {
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    text-decoration: none;
+    transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bracket-equipo-clic:hover,
+.bracket-equipo-clic:focus {
+    filter: brightness(0.94);
+    box-shadow: inset 0 0 0 2px rgba(45, 96, 0, 0.35);
+    outline: none;
+}
+
+.bracket-leyenda .leyenda-box.bracket-equipo-clic {
+    background: #f8f9fb;
+    border: 1px solid #d0d7de;
+    cursor: pointer;
+}
+
+.desglose-pts-detalle {
+    color: #666;
+    font-size: 0.88em;
+}
+
+.close-modal-bracket {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal-bracket:hover,
+.close-modal-bracket:focus {
+    color: var(--color-principal);
+}
+
 .bracket-perdedor {
     background: #ececec;
     color: #999;
