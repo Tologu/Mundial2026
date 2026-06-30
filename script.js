@@ -394,7 +394,7 @@ const NOMBRES_RONDA_ELIM = { R32: 'Dieciseisavos', R16: 'Octavos', R8: 'Cuartos'
 
 function calcularDesgloseAciertos(pronosticosOficiales, pronosticosPerfil) {
     const desglose = {
-        grupos: { exactos: [], signo: [] },
+        grupos: { puntos: 0, aciertos: 0 },
         eliminatorias: { R32: [], R16: [], R8: [], R4: [], Final: [], campeon: null },
         totales: { aciertos: 0, puntos: 0 }
     };
@@ -405,11 +405,9 @@ function calcularDesgloseAciertos(pronosticosOficiales, pronosticosPerfil) {
         if (typeof oficial.local !== 'number' || typeof oficial.visitante !== 'number') return;
         if (typeof jugador.local !== 'number' || typeof jugador.visitante !== 'number') return;
 
-        const resultadoOficial = `${oficial.local}–${oficial.visitante}`;
-        const resultadoJugador = `${jugador.local}–${jugador.visitante}`;
-
         if (oficial.local === jugador.local && oficial.visitante === jugador.visitante) {
-            desglose.grupos.exactos.push({ partido: clave, resultadoOficial, resultadoJugador, puntos: 5 });
+            desglose.grupos.puntos += 5;
+            desglose.grupos.aciertos += 1;
             desglose.totales.aciertos += 1;
             desglose.totales.puntos += 5;
             return;
@@ -418,7 +416,8 @@ function calcularDesgloseAciertos(pronosticosOficiales, pronosticosPerfil) {
         const signoOficial = obtenerSignoResultado(oficial.local, oficial.visitante);
         const signoJugador = obtenerSignoResultado(jugador.local, jugador.visitante);
         if (signoOficial === signoJugador) {
-            desglose.grupos.signo.push({ partido: clave, resultadoOficial, resultadoJugador, puntos: 2 });
+            desglose.grupos.puntos += 2;
+            desglose.grupos.aciertos += 1;
             desglose.totales.aciertos += 1;
             desglose.totales.puntos += 2;
         }
@@ -458,49 +457,36 @@ function calcularDesgloseAciertos(pronosticosOficiales, pronosticosPerfil) {
 }
 
 function renderizarDesgloseAciertosHtml(desglose) {
-    const filasGrupo = (items, etiqueta) => {
-        if (!items.length) return '';
-        const filas = items.map(it =>
-            `<li><strong>${it.partido}</strong> — Oficial: ${it.resultadoOficial} · Tu pronóstico: ${it.resultadoJugador} <span class="desglose-pts">+${it.puntos} pts</span></li>`
-        ).join('');
-        return `<h4>${etiqueta}</h4><ul class="desglose-lista">${filas}</ul>`;
-    };
-
     const filasElim = (ronda) => {
         const items = desglose.eliminatorias[ronda];
         if (!items.length) return '';
+        const ptsRonda = items.reduce((sum, it) => sum + it.puntos, 0);
         const filas = items.map(it =>
             `<li><strong>${it.equipo}</strong> <span class="desglose-pts">+${it.puntos} pts</span></li>`
         ).join('');
-        return `<h4>${NOMBRES_RONDA_ELIM[ronda]}</h4><ul class="desglose-lista">${filas}</ul>`;
+        return `<h4>${NOMBRES_RONDA_ELIM[ronda]} (${ptsRonda} pts)</h4><ul class="desglose-lista">${filas}</ul>`;
     };
 
-    const totalGrupos = desglose.grupos.exactos.length + desglose.grupos.signo.length;
     const totalElim = ['R32', 'R16', 'R8', 'R4', 'Final']
         .reduce((sum, r) => sum + desglose.eliminatorias[r].length, 0)
         + (desglose.eliminatorias.campeon ? 1 : 0);
 
-    if (desglose.totales.aciertos === 0) {
+    if (desglose.grupos.puntos === 0 && totalElim === 0) {
         return '<p class="desglose-vacio">Todavía no hay aciertos registrados.</p>';
     }
 
     let html = `<p class="desglose-resumen">${desglose.totales.aciertos} aciertos · ${desglose.totales.puntos} puntos</p>`;
 
-    if (totalGrupos > 0) {
-        html += '<h3>Fase de grupos</h3>';
-        html += filasGrupo(desglose.grupos.exactos, 'Resultado exacto (+5)');
-        html += filasGrupo(desglose.grupos.signo, 'Signo del resultado (+2)');
+    if (desglose.grupos.puntos > 0) {
+        html += `<h4>Fase de grupos (${desglose.grupos.puntos} pts)</h4>`;
     }
 
-    if (totalElim > 0) {
-        html += '<h3>Eliminatorias</h3>';
-        for (const ronda of ['R32', 'R16', 'R8', 'R4', 'Final']) {
-            html += filasElim(ronda);
-        }
-        if (desglose.eliminatorias.campeon) {
-            const c = desglose.eliminatorias.campeon;
-            html += `<h4>Campeón del mundo</h4><ul class="desglose-lista"><li><strong>${c.equipo}</strong> <span class="desglose-pts">+${c.puntos} pts</span></li></ul>`;
-        }
+    for (const ronda of ['R32', 'R16', 'R8', 'R4', 'Final']) {
+        html += filasElim(ronda);
+    }
+    if (desglose.eliminatorias.campeon) {
+        const c = desglose.eliminatorias.campeon;
+        html += `<h4>Campeón del mundo (${c.puntos} pts)</h4><ul class="desglose-lista"><li><strong>${c.equipo}</strong> <span class="desglose-pts">+${c.puntos} pts</span></li></ul>`;
     }
 
     return html;
