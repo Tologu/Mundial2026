@@ -1777,6 +1777,255 @@ body.perfil-page .tab-button {
     padding-bottom: 10px;
 }
 
+#tabla-clasificacion .td-aciertos {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-principal);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#tabla-clasificacion .td-aciertos:hover,
+#tabla-clasificacion .td-aciertos:focus {
+    background-color: rgba(0, 100, 0, 0.08);
+    outline: none;
+}
+
+.modal-desglose {
+    max-width: 720px;
+}
+
+.desglose-contenido h3 {
+    color: var(--color-principal);
+    margin: 18px 0 8px;
+    font-size: 1.05em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+}
+
+.desglose-contenido h4 {
+    color: #444;
+    margin: 12px 0 6px;
+    font-size: 0.95em;
+}
+
+.desglose-lista {
+    margin: 0 0 8px 0;
+    padding-left: 1.2em;
+}
+
+.desglose-lista li {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.desglose-pts {
+    color: var(--color-principal);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.desglose-resumen {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.desglose-vacio {
+    color: #666;
+    font-style: italic;
+}
+
+.close-modal-desglose {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal-desglose:hover,
+.close-modal-desglose:focus {
+    color: var(--color-principal);
+}
+
+/* ==================================================================== */
+/* CUADRO DE ELIMINATORIAS (index.html) */
+/* ==================================================================== */
+
+.bracket-mundial {
+    max-width: 1400px;
+    margin: 32px auto 40px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(20, 62, 104, 0.15);
+}
+
+.bracket-mundial h2 {
+    margin-bottom: 8px;
+}
+
+.bracket-leyenda {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.bracket-leyenda span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bracket-leyenda .leyenda-box {
+    display: inline-block;
+    width: 20px;
+    height: 14px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
+.bracket-mundial-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+}
+
+.bracket-mundial-contenido {
+    min-height: 60px;
+    color: #777;
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.bracket-mundial-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    width: max-content;
+    min-width: 100%;
+}
+
+.bracket-ronda {
+    display: flex;
+    flex-direction: column;
+    min-width: 188px;
+    flex: 1;
+}
+
+.bracket-ronda-titulo {
+    text-align: center;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-principal) 0%, #1a5a96 100%);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 10px;
+    position: sticky;
+    top: 0;
+}
+
+.bracket-ronda-partidos {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.bracket-ronda-Final {
+    min-width: 210px;
+}
+
+.bracket-ronda-Final .bracket-ronda-partidos {
+    justify-content: center;
+    align-items: center;
+}
+
+.bracket-ronda-Final .bracket-partido {
+    width: 100%;
+    max-width: 220px;
+    border-width: 2px;
+    border-color: var(--color-secundario);
+    box-shadow: 0 2px 10px rgba(253, 185, 39, 0.25);
+}
+
+.bracket-partido {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #f8f9fb;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 6px 8px;
+}
+
+.bracket-equipo {
+    font-size: 0.82em;
+    font-weight: 600;
+    color: #333;
+    padding: 4px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bracket-ganador {
+    background: #c8f5a0;
+    color: #2d6000;
+    font-weight: 700;
+}
+
+.bracket-perdedor {
+    background: #ececec;
+    color: #999;
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.bracket-tbd {
+    background: #ececec;
+    color: #aaa;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.bracket-partido-vacio {
+    opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+    .bracket-mundial {
+        padding: 14px 10px;
+        margin: 24px auto 32px;
+        border-radius: 8px;
+    }
+
+    .bracket-ronda {
+        min-width: 148px;
+    }
+
+    .bracket-equipo {
+        font-size: 0.76em;
+        padding: 3px 5px;
+    }
+
+    .bracket-ronda-titulo {
+        font-size: 0.78em;
+    }
+}
+
 .reglas-contenido h3 {
     color: var(--color-principal);
     margin-top: 20px;

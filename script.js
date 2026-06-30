@@ -390,6 +390,346 @@ function calcularPuntajePerfil(pronosticosOficiales, pronosticosPerfil) {
     return { puntos, aciertos, exactos };
 }
 
+const NOMBRES_RONDA_ELIM = { R32: 'Dieciseisavos', R16: 'Octavos', R8: 'Cuartos', R4: 'Semifinales', Final: 'Final' };
+
+function calcularDesgloseAciertos(pronosticosOficiales, pronosticosPerfil) {
+    const desglose = {
+        grupos: { exactos: [], signo: [] },
+        eliminatorias: { R32: [], R16: [], R8: [], R4: [], Final: [], campeon: null },
+        totales: { aciertos: 0, puntos: 0 }
+    };
+
+    Object.entries(pronosticosOficiales).forEach(([clave, oficial]) => {
+        const jugador = pronosticosPerfil[clave];
+        if (!jugador || !clave.includes(' vs ')) return;
+        if (typeof oficial.local !== 'number' || typeof oficial.visitante !== 'number') return;
+        if (typeof jugador.local !== 'number' || typeof jugador.visitante !== 'number') return;
+
+        const resultadoOficial = `${oficial.local}–${oficial.visitante}`;
+        const resultadoJugador = `${jugador.local}–${jugador.visitante}`;
+
+        if (oficial.local === jugador.local && oficial.visitante === jugador.visitante) {
+            desglose.grupos.exactos.push({ partido: clave, resultadoOficial, resultadoJugador, puntos: 5 });
+            desglose.totales.aciertos += 1;
+            desglose.totales.puntos += 5;
+            return;
+        }
+
+        const signoOficial = obtenerSignoResultado(oficial.local, oficial.visitante);
+        const signoJugador = obtenerSignoResultado(jugador.local, jugador.visitante);
+        if (signoOficial === signoJugador) {
+            desglose.grupos.signo.push({ partido: clave, resultadoOficial, resultadoJugador, puntos: 2 });
+            desglose.totales.aciertos += 1;
+            desglose.totales.puntos += 2;
+        }
+    });
+
+    const rondasElim = [
+        { ronda: 'R32', puntos: 2 },
+        { ronda: 'R16', puntos: 3 },
+        { ronda: 'R8', puntos: 5 },
+        { ronda: 'R4', puntos: 7 },
+        { ronda: 'Final', puntos: 12 }
+    ];
+
+    rondasElim.forEach(({ ronda, puntos: pts }) => {
+        const soloFinal = ronda === 'Final';
+        const oficiales = obtenerEquiposPorRonda(pronosticosOficiales, ronda, soloFinal);
+        const jugador = obtenerEquiposPorRonda(pronosticosPerfil, ronda, soloFinal);
+
+        oficiales.forEach(equipo => {
+            if (jugador.has(equipo)) {
+                desglose.eliminatorias[ronda].push({ equipo, puntos: pts });
+                desglose.totales.aciertos += 1;
+                desglose.totales.puntos += pts;
+            }
+        });
+    });
+
+    const campeonOficial = pronosticosOficiales['M104']?.ganador;
+    const campeonJugador = pronosticosPerfil['M104']?.ganador;
+    if (campeonOficial && campeonJugador && campeonOficial === campeonJugador) {
+        desglose.eliminatorias.campeon = { equipo: campeonOficial, puntos: 8 };
+        desglose.totales.aciertos += 1;
+        desglose.totales.puntos += 8;
+    }
+
+    return desglose;
+}
+
+function renderizarDesgloseAciertosHtml(desglose) {
+    const filasGrupo = (items, etiqueta) => {
+        if (!items.length) return '';
+        const filas = items.map(it =>
+            `<li><strong>${it.partido}</strong> — Oficial: ${it.resultadoOficial} · Tu pronóstico: ${it.resultadoJugador} <span class="desglose-pts">+${it.puntos} pts</span></li>`
+        ).join('');
+        return `<h4>${etiqueta}</h4><ul class="desglose-lista">${filas}</ul>`;
+    };
+
+    const filasElim = (ronda) => {
+        const items = desglose.eliminatorias[ronda];
+        if (!items.length) return '';
+        const filas = items.map(it =>
+            `<li><strong>${it.equipo}</strong> <span class="desglose-pts">+${it.puntos} pts</span></li>`
+        ).join('');
+        return `<h4>${NOMBRES_RONDA_ELIM[ronda]}</h4><ul class="desglose-lista">${filas}</ul>`;
+    };
+
+    const totalGrupos = desglose.grupos.exactos.length + desglose.grupos.signo.length;
+    const totalElim = ['R32', 'R16', 'R8', 'R4', 'Final']
+        .reduce((sum, r) => sum + desglose.eliminatorias[r].length, 0)
+        + (desglose.eliminatorias.campeon ? 1 : 0);
+
+    if (desglose.totales.aciertos === 0) {
+        return '<p class="desglose-vacio">Todavía no hay aciertos registrados.</p>';
+    }
+
+    let html = `<p class="desglose-resumen">${desglose.totales.aciertos} aciertos · ${desglose.totales.puntos} puntos</p>`;
+
+    if (totalGrupos > 0) {
+        html += '<h3>Fase de grupos</h3>';
+        html += filasGrupo(desglose.grupos.exactos, 'Resultado exacto (+5)');
+        html += filasGrupo(desglose.grupos.signo, 'Signo del resultado (+2)');
+    }
+
+    if (totalElim > 0) {
+        html += '<h3>Eliminatorias</h3>';
+        for (const ronda of ['R32', 'R16', 'R8', 'R4', 'Final']) {
+            html += filasElim(ronda);
+        }
+        if (desglose.eliminatorias.campeon) {
+            const c = desglose.eliminatorias.campeon;
+            html += `<h4>Campeón del mundo</h4><ul class="desglose-lista"><li><strong>${c.equipo}</strong> <span class="desglose-pts">+${c.puntos} pts</span></li></ul>`;
+        }
+    }
+
+    return html;
+}
+
+let pronosticosOficialesIndexCache = {};
+let clasificacionIndexCache = [];
+
+function mostrarModalDesgloseAciertos(nombreVisible, slug) {
+    const modal = document.getElementById('modal-desglose-aciertos');
+    const contenido = document.getElementById('desglose-aciertos-contenido');
+    const titulo = document.getElementById('desglose-aciertos-titulo');
+    if (!modal || !contenido) return;
+
+    const item = clasificacionIndexCache.find(p => p.slug === slug);
+    if (!item) return;
+
+    const desglose = calcularDesgloseAciertos(pronosticosOficialesIndexCache, item.pronosticos || {});
+    if (titulo) titulo.textContent = `Aciertos de ${nombreVisible}`;
+    contenido.innerHTML = renderizarDesgloseAciertosHtml(desglose);
+    modal.classList.remove('modal-hidden');
+}
+
+function cerrarModalDesgloseAciertos() {
+    const modal = document.getElementById('modal-desglose-aciertos');
+    if (modal) modal.classList.add('modal-hidden');
+}
+
+// ====================================================================
+// 0.3 CUADRO OFICIAL DE ELIMINATORIAS (DIECISEISAVOS → FINAL) – INDEX
+// ====================================================================
+
+// Versión "pura" de obtenerClasificados(): recibe los resultados como parámetro
+// en lugar de leer la variable global pronosticosConfirmados, para poder calcular
+// el cuadro oficial sin depender del estado de edición de partidos.html.
+function obtenerClasificadosPara(resultados) {
+    const clasificados = { primeros: [], segundos: [], terceros: [] };
+    const mejoresTerceros = calcularMejoresTercerosParaResultados(resultados);
+    const nombresMejoresTerceros = mejoresTerceros.map(t => t.equipo);
+
+    gruposData.forEach(grupo => {
+        const clasificacionGrupo = calcularClasificacion(grupo.nombre, grupo.equipos, resultados);
+        if (clasificacionGrupo.length >= 4) {
+            clasificados.primeros.push({ equipo: clasificacionGrupo[0].equipo, grupo: grupo.nombre });
+            clasificados.segundos.push({ equipo: clasificacionGrupo[1].equipo, grupo: grupo.nombre });
+
+            const tercerLugar = clasificacionGrupo[2].equipo;
+            if (nombresMejoresTerceros.includes(tercerLugar)) {
+                const dataTercero = mejoresTerceros.find(t => t.equipo === tercerLugar);
+                clasificados.terceros.push(dataTercero);
+            }
+        }
+    });
+    clasificados.terceros.sort((a, b) => {
+        if (a.ptos !== b.ptos) return b.ptos - a.ptos;
+        if (a.dg !== b.dg) return b.dg - a.dg;
+        return b.gf - a.gf;
+    });
+
+    return clasificados;
+}
+
+// Quita el prefijo "M" y el sufijo "-G"/"-P" de una referencia de llave (p.ej. "M101-G" -> "101")
+function limpiarLlaveBracket(ref) {
+    return ref.replace(/^M/, '').replace(/-[GP]$/, '');
+}
+
+// Calcula, de forma 100% derivada (sin mutar ni guardar nada), el orden visual
+// (de arriba a abajo) de las llaves de cada ronda, de modo que cada partido quede
+// centrado entre los dos partidos de la ronda anterior que lo alimentan.
+function obtenerOrdenVisualBracket() {
+    const childrenMap = {};
+    ['R16', 'R8', 'R4', 'Final'].forEach(ronda => {
+        encadenamientoBracket[ronda].forEach(cfg => {
+            if (cfg.llave === 103) return; // 3er puesto queda fuera del árbol principal
+            childrenMap[String(cfg.llave)] = {
+                ronda,
+                hijos: [limpiarLlaveBracket(cfg.equipo1Ganador), limpiarLlaveBracket(cfg.equipo2Ganador)]
+            };
+        });
+    });
+
+    const ordenPorRonda = { R32: [], R16: [], R8: [], R4: [], Final: [] };
+    function visitar(llave) {
+        const nodo = childrenMap[llave];
+        if (!nodo) {
+            ordenPorRonda.R32.push(llave);
+            return;
+        }
+        visitar(nodo.hijos[0]);
+        visitar(nodo.hijos[1]);
+        ordenPorRonda[nodo.ronda].push(llave);
+    }
+    visitar('104');
+
+    return ordenPorRonda;
+}
+
+// Reconstruye el cuadro oficial completo (M73 a M104) de forma pura, a partir de los
+// pronósticos oficiales: emparejamientos de dieciseisavos sacados de la clasificación de
+// grupos + ganadores ya confirmados en partidos.html. No muta ni guarda nada.
+function calcularBracketOficialCompleto(pronosticosOficiales) {
+    const TOTAL_PARTIDOS_GRUPOS = 12 * 6;
+    const partidosConfirmados = Object.keys(pronosticosOficiales).filter(k => k.includes(' vs ')).length;
+    const grupoCompleto = partidosConfirmados >= TOTAL_PARTIDOS_GRUPOS;
+
+    const partidos = {};
+    let r32Pares = [];
+
+    if (grupoCompleto) {
+        const clasificados = obtenerClasificadosPara(pronosticosOficiales);
+        const p = {}; clasificados.primeros.forEach(c => p[c.grupo] = c.equipo);
+        const s = {}; clasificados.segundos.forEach(c => s[c.grupo] = c.equipo);
+        const terceroAsignado = asignarTercerosASlots(clasificados.terceros);
+
+        r32Pares = [
+            { llave: 73, equipo1: s['A'], equipo2: s['B'] },
+            { llave: 74, equipo1: p['E'], equipo2: terceroAsignado[74] || null },
+            { llave: 75, equipo1: p['F'], equipo2: s['C'] },
+            { llave: 76, equipo1: p['C'], equipo2: s['F'] },
+            { llave: 77, equipo1: p['I'], equipo2: terceroAsignado[77] || null },
+            { llave: 78, equipo1: s['E'], equipo2: s['I'] },
+            { llave: 79, equipo1: p['A'], equipo2: terceroAsignado[79] || null },
+            { llave: 80, equipo1: p['L'], equipo2: terceroAsignado[80] || null },
+            { llave: 81, equipo1: p['D'], equipo2: terceroAsignado[81] || null },
+            { llave: 82, equipo1: p['G'], equipo2: terceroAsignado[82] || null },
+            { llave: 83, equipo1: s['K'], equipo2: s['L'] },
+            { llave: 84, equipo1: p['H'], equipo2: s['J'] },
+            { llave: 85, equipo1: p['B'], equipo2: terceroAsignado[85] || null },
+            { llave: 86, equipo1: p['J'], equipo2: s['H'] },
+            { llave: 87, equipo1: p['K'], equipo2: terceroAsignado[87] || null },
+            { llave: 88, equipo1: s['D'], equipo2: s['G'] },
+        ];
+    }
+
+    r32Pares.forEach(m => {
+        const key = `M${m.llave}`;
+        const equipo1 = m.equipo1 || null;
+        const equipo2 = m.equipo2 || null;
+        const oficial = pronosticosOficiales[key];
+        const ganador = (oficial && oficial.ganador && (oficial.ganador === equipo1 || oficial.ganador === equipo2))
+            ? oficial.ganador : null;
+        partidos[key] = { equipo1, equipo2, ganador, ronda: 'R32' };
+    });
+
+    const obtenerGanadorM = (llave) => partidos[`M${llave}`]?.ganador || null;
+    const obtenerPerdedorM = (llave) => {
+        const m = partidos[`M${llave}`];
+        if (!m || !m.ganador || !m.equipo1 || !m.equipo2) return null;
+        return m.ganador === m.equipo1 ? m.equipo2 : m.equipo1;
+    };
+    const resolverRef = (ref) => {
+        if (!ref) return null;
+        if (ref.endsWith('-G')) return obtenerGanadorM(limpiarLlaveBracket(ref));
+        if (ref.endsWith('-P')) return obtenerPerdedorM(limpiarLlaveBracket(ref));
+        return obtenerGanadorM(limpiarLlaveBracket(ref));
+    };
+
+    ['R16', 'R8', 'R4', 'Final'].forEach(ronda => {
+        encadenamientoBracket[ronda].forEach(cfg => {
+            const key = `M${cfg.llave}`;
+            const equipo1 = resolverRef(cfg.equipo1Ganador);
+            const equipo2 = resolverRef(cfg.equipo2Ganador);
+            const oficial = pronosticosOficiales[key];
+            const ganador = (oficial && oficial.ganador && (oficial.ganador === equipo1 || oficial.ganador === equipo2))
+                ? oficial.ganador : null;
+            partidos[key] = { equipo1, equipo2, ganador, ronda, nombre: cfg.nombre || null };
+        });
+    });
+
+    return partidos;
+}
+
+function bracketEquipoHtml(equipo, esGanador, hayGanador) {
+    if (!equipo) {
+        return `<span class="bracket-equipo bracket-tbd">Por determinar</span>`;
+    }
+    let clase = 'bracket-equipo';
+    if (hayGanador) clase += esGanador ? ' bracket-ganador' : ' bracket-perdedor';
+    const trofeo = (esGanador && hayGanador) ? '🏆 ' : '';
+    return `<span class="${clase}">${trofeo}${equipo}</span>`;
+}
+
+function bracketPartidoHtml(match, claseExtra) {
+    if (!match) {
+        return `<div class="bracket-partido bracket-partido-vacio${claseExtra ? ' ' + claseExtra : ''}">
+            ${bracketEquipoHtml(null)}
+            ${bracketEquipoHtml(null)}
+        </div>`;
+    }
+    const hayGanador = !!match.ganador;
+    return `<div class="bracket-partido${claseExtra ? ' ' + claseExtra : ''}">
+        ${bracketEquipoHtml(match.equipo1, match.ganador === match.equipo1, hayGanador)}
+        ${bracketEquipoHtml(match.equipo2, match.ganador === match.equipo2, hayGanador)}
+    </div>`;
+}
+
+function renderizarBracketMundialHtml(bracket, ordenPorRonda) {
+    const rondas = [
+        { id: 'R32', nombre: 'Dieciseisavos' },
+        { id: 'R16', nombre: 'Octavos' },
+        { id: 'R8', nombre: 'Cuartos' },
+        { id: 'R4', nombre: 'Semifinales' },
+        { id: 'Final', nombre: 'Final' }
+    ];
+
+    let html = '<div class="bracket-mundial-grid">';
+    rondas.forEach(({ id, nombre }) => {
+        const llaves = ordenPorRonda[id] || [];
+        html += `<div class="bracket-ronda bracket-ronda-${id}">
+            <h3 class="bracket-ronda-titulo">${nombre}</h3>
+            <div class="bracket-ronda-partidos">`;
+        llaves.forEach(llave => {
+            html += bracketPartidoHtml(bracket[`M${llave}`]);
+        });
+        html += `</div></div>`;
+    });
+    html += '</div>';
+    return html;
+}
+
+function actualizarBracketMundialIndex(pronosticosOficiales) {
+    const contenedor = document.getElementById('bracket-mundial-contenido');
+    if (!contenedor) return;
+    const bracket = calcularBracketOficialCompleto(pronosticosOficiales);
+    const ordenPorRonda = obtenerOrdenVisualBracket();
+    contenedor.innerHTML = renderizarBracketMundialHtml(bracket, ordenPorRonda);
+}
+
 async function obtenerAcertantesExactos(nombrePartido, useAsync = false) {
     const pronosticosOficiales = useAsync 
         ? await cargarPronosticosOficialesAsync() 
@@ -551,6 +891,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
     const pronosticosOficiales = useAsync
         ? await cargarPronosticosOficialesAsync()
         : cargarPronosticosPorClave(perfilesConfig.partidos.key);
+
+    actualizarBracketMundialIndex(pronosticosOficiales);
 
     const claveProximo = obtenerProximoPartidoClave(pronosticosOficiales);
 
@@ -792,13 +1134,15 @@ async function actualizarClasificacionIndex(useAsync = false) {
             ? `<span class="premio-badge">${formatearPremio(premiosTotales[rank] / tamGrupo[rank])}</span> `
             : '';
 
+        const tdAciertos = `<td class="td-aciertos" data-slug="${item.slug}" data-nombre="${item.nombreVisible}" role="button" tabindex="0" title="Ver desglose de aciertos">${item.aciertos}</td>`;
+
         if (esUltimo) {
             fila.classList.add('puesto-ultimo');
             fila.innerHTML = `
                 <td>${premioBadge}${posicion}${flechaHtml} <span class="emoji-clown">🤡</span></td>
                 <td><a href="perfil-${item.slug}.html" class="ultimo-puesto">${item.nombreVisible}</a></td>
                 <td>${item.puntos} <span class="emoji-poop">💩</span></td>
-                <td>${item.aciertos}</td>
+                ${tdAciertos}
                 <td>${item.exactos}</td>
                 ${tdProximo}
             `;
@@ -807,7 +1151,7 @@ async function actualizarClasificacionIndex(useAsync = false) {
                 <td>${premioBadge}${posicion}${flechaHtml}${emojiCorona}${emojiPodio ? ` <span class="emoji-podio">${emojiPodio}</span>` : ''}</td>
                 <td><a href="perfil-${item.slug}.html">${item.nombreVisible}</a></td>
                 <td>${item.puntos}</td>
-                <td>${item.aciertos}</td>
+                ${tdAciertos}
                 <td>${item.exactos}</td>
                 ${tdProximo}
             `;
@@ -815,6 +1159,8 @@ async function actualizarClasificacionIndex(useAsync = false) {
         tbody.appendChild(fila);
     });
 
+    pronosticosOficialesIndexCache = pronosticosOficiales;
+    clasificacionIndexCache = clasificacion;
 
     // Si el torneo terminó, mostrar ganador de la porra en el aviso
     if (avisoEl && pronosticosOficiales['M104']?.ganador && clasificacion.length > 0) {
@@ -2933,6 +3279,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        const modalDesglose = document.getElementById('modal-desglose-aciertos');
+        const closeDesglose = document.querySelector('.close-modal-desglose');
+        if (modalDesglose) {
+            if (closeDesglose) {
+                closeDesglose.addEventListener('click', cerrarModalDesgloseAciertos);
+            }
+            modalDesglose.addEventListener('click', (event) => {
+                if (event.target === modalDesglose) cerrarModalDesgloseAciertos();
+            });
+        }
+
+        tablaClasificacion.addEventListener('click', (event) => {
+            const celda = event.target.closest('.td-aciertos');
+            if (!celda) return;
+            mostrarModalDesgloseAciertos(celda.dataset.nombre, celda.dataset.slug);
+        });
+        tablaClasificacion.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const celda = event.target.closest('.td-aciertos');
+            if (!celda) return;
+            event.preventDefault();
+            mostrarModalDesgloseAciertos(celda.dataset.nombre, celda.dataset.slug);
+        });
 
         // Botón de reinicio total (en index.html)
         const btnReiniciarTotal = document.getElementById('btn-reiniciar-app-total');

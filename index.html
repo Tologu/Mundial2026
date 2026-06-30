@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>🏆 Clasificación Mundial 2026</title>
-    <link rel="stylesheet" href="styles.css?v=20260615d">
+    <link rel="stylesheet" href="styles.css?v=20260630c">
 </head>
 <body>
     <header>
@@ -35,6 +35,18 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <section class="bracket-mundial" id="bracket-mundial" aria-labelledby="bracket-mundial-titulo">
+            <h2 id="bracket-mundial-titulo">🏆 Cuadro de Eliminatorias</h2>
+            <div class="bracket-leyenda">
+                <span><span class="leyenda-box bracket-ganador"></span> Equipo que avanza</span>
+                <span><span class="leyenda-box bracket-perdedor"></span> Equipo eliminado</span>
+                <span><span class="leyenda-box bracket-tbd"></span> Por determinar</span>
+            </div>
+            <div class="bracket-mundial-scroll">
+                <div id="bracket-mundial-contenido" class="bracket-mundial-contenido">Cargando cuadro...</div>
+            </div>
+        </section>
 
         <section class="tablon-comentarios" id="tablon-comentarios" aria-labelledby="tablon-titulo">
             <div class="tablon-header">
@@ -83,6 +95,15 @@
         </div>
     </div>
 
+    <!-- Modal de desglose de aciertos -->
+    <div id="modal-desglose-aciertos" class="modal modal-hidden">
+        <div class="modal-content modal-desglose">
+            <span class="close-modal-desglose">&times;</span>
+            <h2 id="desglose-aciertos-titulo">Desglose de aciertos</h2>
+            <div id="desglose-aciertos-contenido" class="desglose-contenido"></div>
+        </div>
+    </div>
+
     <!-- Modal de Reglas -->
     <div id="modal-reglas" class="modal modal-hidden">
         <div class="modal-content">
@@ -121,6 +142,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="script.js?v=20260615d"></script>
+    <script src="script.js?v=20260630c"></script>
 </body>
 </html>
